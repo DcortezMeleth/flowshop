@@ -3,7 +3,6 @@ package pl.edu.agh;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import pl.edu.agh.utils.ResourceFileReader;
-import weka.classifiers.Evaluation;
 import weka.classifiers.bayes.NaiveBayes;
 import weka.core.*;
 
@@ -19,7 +18,7 @@ public class Experiment {
     public static void main(String[] args) {
         ResourceFileReader reader = new ResourceFileReader();
         try {
-            BufferedReader bufferedReader = new BufferedReader(new FileReader(reader.getFile("example.arff")));
+            BufferedReader bufferedReader = new BufferedReader(new FileReader(reader.getResourcesFile("example.arff")));
 
             Instances train = new Instances(bufferedReader);
             train.setClassIndex(train.numAttributes() - 1);
