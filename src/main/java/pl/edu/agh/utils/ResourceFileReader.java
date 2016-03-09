@@ -5,6 +5,7 @@ import org.apache.commons.io.IOUtils;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * @author Bartosz
@@ -21,7 +22,7 @@ public class ResourceFileReader {
     /** tmp files counter */
     private static int counter = 0;
 
-    /** Gets content of file from resources directory. */
+    /** Gets file from resources directory. */
     public File getResourcesFile(final String fileName) {
         ClassLoader classLoader = getClass().getClassLoader();
         File tmpFile = null;
@@ -36,6 +37,12 @@ public class ResourceFileReader {
         }
 
         return tmpFile;
+    }
+
+    /** Gets {@link InputStream} of file from resources directory. */
+    public InputStream getResourcesFileStream(final String fileName) {
+        ClassLoader classLoader = getClass().getClassLoader();
+        return classLoader.getResourceAsStream(fileName);
     }
 
 }

@@ -1,6 +1,10 @@
 package pl.edu.agh.flowshop;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.bayes.BayesNet;
+import weka.classifiers.bayes.NaiveBayes;
+import weka.classifiers.rules.JRip;
+import weka.classifiers.trees.J48;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -14,6 +18,7 @@ import weka.core.SparseInstance;
  */
 public class Machine extends MachineConf {
 
+    /** Vector of {@link weka.core.Attribute Attributes} used for learning */
     private final static FastVector attributes;
 
     /** Initialization of attributes for learning process */
@@ -23,7 +28,7 @@ public class Machine extends MachineConf {
     }
 
     /** Classifier used for machine to learn */
-    private final Classifier classifier;
+    private Classifier classifier;
     /** Train set used to teach {@link #classifier} */
     private Instances trainSet;
     /** Type of processed product */
@@ -31,9 +36,29 @@ public class Machine extends MachineConf {
     /** Turns left for product to be processed */
     private Integer turnsLeft;
 
+    /** Constructor using configuration object. */
     public Machine(final Classifier classifier, final MachineConf conf) {
         super(conf.machineId, conf.timeTable);
-        this.classifier = classifier;
+        assignClassfier(conf.classifierName);
+    }
+
+    /** Assigns classifier based on its name from config */
+    private void assignClassfier(final String classifierName) {
+        switch (classifierName) {
+            case "J48":
+                this.classifier = new J48();
+                break;
+            case "JRip":
+                this.classifier = new JRip();
+                break;
+            case "BayesNet":
+                this.classifier = new BayesNet();
+                break;
+            case "NaiveBayes":
+            default:
+                this.classifier = new NaiveBayes();
+                break;
+        }
     }
 
     /**
