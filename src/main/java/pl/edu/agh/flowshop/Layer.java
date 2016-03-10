@@ -57,8 +57,13 @@ public class Layer {
             }
         }
 
+        //chance for changing processing product type
+        for(Machine machine : this.machines){
+            machine.decideOnAction();
+        }
+
         //offer tasks to machines and tick
-        for (Machine machine : machines) {
+        for (Machine machine : this.machines) {
             for (int i = 0; i < this.tasksQueue.length; i++) {
                 if (this.tasksQueue[i] > 0) {
                     if (machine.processProduct(i)) {
