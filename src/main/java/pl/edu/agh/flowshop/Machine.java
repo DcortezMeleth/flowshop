@@ -29,10 +29,13 @@ public class Machine extends MachineConf {
 
     /** Classifier used for machine to learn */
     private Classifier classifier;
+
     /** Train set used to teach {@link #classifier} */
     private Instances trainSet;
+
     /** Type of processed product */
     private Integer productType;
+
     /** Turns left for product to be processed */
     private Integer turnsLeft;
 
@@ -66,9 +69,12 @@ public class Machine extends MachineConf {
      *
      * @param productType type of product to process
      */
-    public void processProduct(final int productType) {
-        this.productType = productType;
+    public boolean processProduct(final int productType) {
+        if(this.turnsLeft != 0 || this.productType != productType) {
+            return false;
+        }
         this.turnsLeft = this.timeTable.get(productType);
+        return true;
     }
 
     /** Decrements a counter of {@link #turnsLeft}. Used on begining of a turn. */
@@ -89,10 +95,13 @@ public class Machine extends MachineConf {
     /**
      * Classifies given example based on {@link #classifier} decision.
      *
-     * @return class number
      * @throws Exception
      */
-    public int classify() throws Exception {
+    public void decideOnAction() throws Exception {
+        //zmienic typ mozemy tylko gdy aktualnie czegos nie przetwarzamy
+        if(this.turnsLeft != 0) {
+            return;
+        }
         Instance instance = new SparseInstance(4);
         //TODO: set data into instance
 
@@ -100,7 +109,12 @@ public class Machine extends MachineConf {
         data.setClassIndex(data.numAttributes() - 1);
         instance.setDataset(data);
 
-        return (int) this.classifier.classifyInstance(instance);
+        double[] probabilities = this.classifier.distributionForInstance(instance);
+        int result = chooseAction(probabilities);
+        if(result != this.productType) {
+            this.turnsLeft++;
+        }
+        this.productType = result;
     }
 
     /**
@@ -111,5 +125,13 @@ public class Machine extends MachineConf {
         //TODO: set data into instance
 
         this.trainSet.add(instance);
+    }
+
+    /** Choses action based on their probabilities */
+    private int chooseAction(final double[] propabilities) {
+        int result = 0;
+        //TODO strategia wyboru?
+
+        return 0;
     }
 }
