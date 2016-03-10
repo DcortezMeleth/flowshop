@@ -16,7 +16,7 @@ public class ResourceFileReader {
     /** Prefix of tmp file */
     private static final String PREFIX = "input";
 
-    /** Suffix of tmp file*/
+    /** Suffix of tmp file */
     private static final String SUFFIX = ".tmp";
 
     /** tmp files counter */
@@ -29,7 +29,7 @@ public class ResourceFileReader {
         try {
             tmpFile = File.createTempFile(PREFIX + counter++, SUFFIX);
             tmpFile.deleteOnExit();
-            try(FileOutputStream result = new FileOutputStream(tmpFile)) {
+            try (FileOutputStream result = new FileOutputStream(tmpFile)) {
                 IOUtils.copy(classLoader.getResourceAsStream(fileName), result);
             }
         } catch (IOException e) {

@@ -32,38 +32,44 @@ public class Layer {
 
     /** Adds produkt of type <code>productType</code> to queue */
     public void addProductToQueue(final int productType) {
-        tasksQueue[productType - 1] += 1;
+        this.tasksQueue[productType - 1] += 1;
     }
 
     /** Simulates one turn for layer */
     public int[] tick(final int turnNo, final int[] newTasks) throws Exception {
         //add new tasks to queue
-        for(int i=0; i<this.tasksQueue.length; i++) {
+        for (int i = 0; i < this.tasksQueue.length; i++) {
             this.tasksQueue[i] += newTasks[i];
         }
 
         //collect finished products
         int[] finishedProducts = new int[tasksQueue.length];
-        for(Machine machine : machines) {
-            if(machine.getProcessed() != null) {
+        for (Machine machine : this.machines) {
+            if (machine.getProcessed() != null) {
                 finishedProducts[machine.getProcessed()] += 1;
             }
         }
 
-        if(turnNo % LEARNING_TURN == 0) {
-            for(Machine machine : machines) {
+        //train on collected data
+        if (turnNo % LEARNING_TURN == 0) {
+            for (Machine machine : this.machines) {
                 machine.train();
             }
         }
 
-        //offer tasks to machines
+        //offer tasks to machines and tick
+        for (Machine machine : machines) {
+            for (int i = 0; i < this.tasksQueue.length; i++) {
+                if (this.tasksQueue[i] > 0) {
+                    if (machine.processProduct(i)) {
+                        this.tasksQueue[i] -= 1;
+                        break;
+                    }
+                }
+            }
 
-
-        //tick
-        for(Machine machine : machines) {
             machine.tick();
         }
-
 
         return finishedProducts;
     }

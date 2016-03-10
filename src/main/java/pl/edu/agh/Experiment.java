@@ -2,14 +2,9 @@ package pl.edu.agh;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
 import pl.edu.agh.flowshop.MachineConf;
-import pl.edu.agh.utils.ResourceFileReader;
-import weka.classifiers.bayes.NaiveBayes;
-import weka.core.*;
 
 import java.io.*;
-import java.lang.reflect.Type;
 import java.util.*;
 
 /**
@@ -106,14 +101,14 @@ public class Experiment {
         prop.add(machines);
         prop.add(machines2);
 
-        try (Writer writer = new FileWriter("config.json")) {
+        try (Writer writer = new FileWriter("machines.json")) {
             gson.toJson(prop, writer);
         } catch (IOException e) {
             e.printStackTrace();
         }
 
         /*List<List<MachineConf>> properties = new ArrayList<>();
-        try (Reader reader = new InputStreamReader(new ResourceFileReader().getResourcesFileStream("config.json"))) {
+        try (Reader reader = new InputStreamReader(new ResourceFileReader().getResourcesFileStream("machines.json"))) {
             Type type = new TypeToken<List<List<MachineConf>>>() {}.getType();
             properties = gson.fromJson(reader, type);
         } catch (IOException e) {

@@ -40,9 +40,11 @@ public class Machine extends MachineConf {
     private Integer turnsLeft;
 
     /** Constructor using configuration object. */
-    public Machine(final Classifier classifier, final MachineConf conf) {
+    public Machine(final MachineConf conf) {
         super(conf.machineId, conf.timeTable);
         assignClassfier(conf.classifierName);
+
+        this.trainSet = new Instances("TrainSet", attributes, 0);
     }
 
     /** Assigns classifier based on its name from config */
@@ -70,7 +72,7 @@ public class Machine extends MachineConf {
      * @param productType type of product to process
      */
     public boolean processProduct(final int productType) {
-        if(this.turnsLeft != 0 || this.productType != productType) {
+        if (this.turnsLeft != 0 || this.productType != productType) {
             return false;
         }
         this.turnsLeft = this.timeTable.get(productType);
@@ -99,7 +101,7 @@ public class Machine extends MachineConf {
      */
     public void decideOnAction() throws Exception {
         //zmienic typ mozemy tylko gdy aktualnie czegos nie przetwarzamy
-        if(this.turnsLeft != 0) {
+        if (this.turnsLeft != 0) {
             return;
         }
         Instance instance = new SparseInstance(4);
@@ -111,7 +113,7 @@ public class Machine extends MachineConf {
 
         double[] probabilities = this.classifier.distributionForInstance(instance);
         int result = chooseAction(probabilities);
-        if(result != this.productType) {
+        if (result != this.productType) {
             this.turnsLeft++;
         }
         this.productType = result;

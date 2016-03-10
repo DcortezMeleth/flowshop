@@ -7,4 +7,5 @@ package pl.edu.agh.utils;
  *         Created on 2016-03-09.
  */
 public class ConfigReader {
+
 }
