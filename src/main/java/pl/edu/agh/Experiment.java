@@ -2,7 +2,10 @@ package pl.edu.agh;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import pl.edu.agh.flowshop.Machine;
 import pl.edu.agh.flowshop.MachineConf;
+import pl.edu.agh.utils.ConfigReader;
+import pl.edu.agh.utils.ResourceFileReader;
 
 import java.io.*;
 import java.util.*;
@@ -75,7 +78,7 @@ public class Experiment {
             e.printStackTrace();
         }*/
 
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        /*Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
 
         Map<Integer, Integer> map = new HashMap<>();
@@ -105,7 +108,7 @@ public class Experiment {
             gson.toJson(prop, writer);
         } catch (IOException e) {
             e.printStackTrace();
-        }
+        }/*
 
         /*List<List<MachineConf>> properties = new ArrayList<>();
         try (Reader reader = new InputStreamReader(new ResourceFileReader().getResourcesFileStream("machines.json"))) {
@@ -116,5 +119,13 @@ public class Experiment {
         }
 
         System.out.println(properties);*/
+
+        Properties properties = new Properties();
+        try {
+            properties.load(new ResourceFileReader().getResourcesFileStream("flowshop.properties"));
+            System.out.println(properties.getProperty(ConfigReader.LEARNING_TURN_KEY));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
