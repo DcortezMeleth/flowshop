@@ -1,7 +1,6 @@
 package pl.edu.agh.flowshop;
 
 import com.google.common.collect.EvictingQueue;
-import com.google.common.collect.Queues;
 
 import java.util.List;
 import java.util.Queue;
@@ -34,9 +33,7 @@ public class Model {
         this.queueSize = queueSize;
     }
 
-    /**
-     * Method generates new order.
-     */
+    /** Method generates new order. */
     private int[] generateOrder() {
         Random random = new Random();
         int[] order = new int[this.productTypesNo];
@@ -61,7 +58,7 @@ public class Model {
             //generate new order
             if (random.nextInt() % 5 == 0) {
                 order = generateOrder();
-                orders.add(order);
+                orders.offer(order);
             } else {
                 order = new int[this.productTypesNo];
             }
@@ -72,7 +69,7 @@ public class Model {
             }
 
             //collect finished products
-            for(int i=0; i<this.productTypesNo; i++) {
+            for (int i = 0; i < this.productTypesNo; i++) {
                 finishedProducts[i] += order[i];
             }
 
@@ -83,18 +80,19 @@ public class Model {
 
     /** Removes orders from queue when all products are ready */
     public void deliverOrders(final Queue<int[]> orders, final int[] finishedProducts) {
-        for(int[] order : orders) {
-            for(int i=0; i<finishedProducts.length; i++) {
+        for (int[] order : orders) {
+            for (int i = 0; i < finishedProducts.length; i++) {
                 //not enough product -> we are finished
-                if(order[i] > finishedProducts[i]) {
+                if (order[i] > finishedProducts[i]) {
                     return;
                 }
             }
 
             //order finished -> remove from queue
-            for(int i=0; i<finishedProducts.length; i++) {
+            for (int i = 0; i < finishedProducts.length; i++) {
                 finishedProducts[i] -= order[i];
             }
+            orders.poll();
         }
     }
 

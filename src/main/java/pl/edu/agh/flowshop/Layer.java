@@ -11,7 +11,7 @@ import java.util.List;
 public class Layer {
 
     /** Number of turn between learning process */
-    private static final int LEARNING_TURN = 20;
+    private final int learningTurn;
 
     /** {@link Machine Machines} in layer. */
     private List<Machine> machines;
@@ -25,9 +25,10 @@ public class Layer {
      * @param machines       list of {@link Machine} objects in layer
      * @param productTypesNo number of types of product used in simulation
      */
-    public Layer(final List<Machine> machines, final int productTypesNo) {
+    public Layer(final List<Machine> machines, final int productTypesNo, final int learningTurn) {
         this.machines = machines;
         this.tasksQueue = new int[productTypesNo];
+        this.learningTurn = learningTurn;
     }
 
     /** Adds produkt of type <code>productType</code> to queue */
@@ -51,7 +52,7 @@ public class Layer {
         }
 
         //train on collected data
-        if (turnNo % LEARNING_TURN == 0) {
+        if (turnNo % learningTurn == 0) {
             for (Machine machine : this.machines) {
                 machine.train();
             }
