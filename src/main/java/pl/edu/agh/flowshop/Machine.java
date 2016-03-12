@@ -11,7 +11,7 @@ import weka.core.Instances;
 import weka.core.SparseInstance;
 
 /**
- * Maszyna przetwarzajaca zadania.
+ * Machine processing tasks
  *
  * @author Bartosz Sądel
  *         Created on 02.02.2016.
@@ -42,13 +42,13 @@ public class Machine extends MachineConf {
     /** Constructor using configuration object. */
     public Machine(final MachineConf conf) {
         super(conf.machineId, conf.timeTable);
-        assignClassfier(conf.classifierName);
+        assignClassifier(conf.classifierName);
 
         this.trainSet = new Instances("TrainSet", attributes, 0);
     }
 
     /** Assigns classifier based on its name from config */
-    private void assignClassfier(final String classifierName) {
+    private void assignClassifier(final String classifierName) {
         switch (classifierName) {
             case "J48":
                 this.classifier = new J48();

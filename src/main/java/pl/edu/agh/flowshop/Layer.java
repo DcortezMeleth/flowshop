@@ -31,11 +31,6 @@ public class Layer {
         this.learningTurn = learningTurn;
     }
 
-    /** Adds produkt of type <code>productType</code> to queue */
-    public void addProductToQueue(final int productType) {
-        this.tasksQueue[productType - 1] += 1;
-    }
-
     /** Simulates one turn for layer */
     public int[] tick(final int turnNo, final int[] newTasks) throws Exception {
         //add new tasks to queue
@@ -52,7 +47,7 @@ public class Layer {
         }
 
         //train on collected data
-        if (turnNo % learningTurn == 0) {
+        if (turnNo % this.learningTurn == 0) {
             for (Machine machine : this.machines) {
                 machine.train();
             }
