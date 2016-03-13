@@ -1,6 +1,7 @@
 package pl.edu.agh.flowshop;
 
 import com.google.common.collect.EvictingQueue;
+import org.apache.commons.math3.distribution.PoissonDistribution;
 
 import java.util.*;
 
@@ -37,37 +38,39 @@ public class Model {
 
     /** Method generates new order. */
     private Order generateOrder() {
-        Random random = new Random();
+        PoissonDistribution random = new PoissonDistribution(3);
         int[] order = new int[this.productTypesNo];
 
         int reward = 0;
         for (int i = 0; i < this.productTypesNo; i++) {
-            order[i] = random.nextInt(5);
+            order[i] = random.sample();
             reward += order[i] * this.costs.get(i);
         }
 
-        int penalty = random.nextInt(reward) - 3;
+        int penalty = random.sample();
         penalty = penalty > 0 ? penalty : 0;
 
-        return new Order(order, random.nextInt(8) + 3, reward, penalty);
+        return new Order(order, random.sample() + 3, reward, penalty);
     }
 
     /** Experiment main loop */
     public void run() throws Exception {
-        Random random = new Random();
+        PoissonDistribution random = new PoissonDistribution(3);
         Queue<Order> orders = EvictingQueue.create(this.queueSize);
         Order order;
         int[] products;
         int[] finishedProducts = new int[this.productTypesNo];
+        int newOrderTurn = random.sample();
 
         //main loop
         for (int turnNo = 0; turnNo < this.turnsLimit; turnNo++) {
 
             //generate new order
-            if (random.nextInt() % 5 == 0) {
+            if (turnNo == newOrderTurn) {
                 order = generateOrder();
                 orders.offer(order);
                 products = order.getProductsList();
+                newOrderTurn += random.sample();
             } else {
                 products = new int[this.productTypesNo];
             }
