@@ -12,9 +12,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 
 /**
  * Class responsible for reading an experiment configuration from file.
@@ -36,6 +34,9 @@ public class ConfigReader {
     /** Key for product types no. value in properties file. */
     private static final String PRODUCT_TYPES_NO = "PRODUCT_TYPES";
 
+    /** Key for product types no. value in properties file. */
+    private static final String PRODUCT_PRICE = "PRODUCT_PRICE_";
+
     /** File with experiment configuration */
     private static final String PROPERTIES_FILE = "flowshop.properties";
 
@@ -53,6 +54,11 @@ public class ConfigReader {
         int queueSize = Integer.parseInt(configuration.getProperty(QUEUE_SIZE_KEY));
         int productTypesNo = Integer.parseInt(configuration.getProperty(PRODUCT_TYPES_NO));
 
+        Map<Integer, Integer> costs = new HashMap<>();
+        for(int i=1; i<=productTypesNo; i++) {
+            costs.put(i, Integer.valueOf(configuration.getProperty(PRODUCT_PRICE + i)));
+        }
+
         List<Layer> layers = new ArrayList<>();
         for(List<MachineConf> configurations : machinesConf) {
             List<Machine> machines = new ArrayList<>();
@@ -62,7 +68,7 @@ public class ConfigReader {
             layers.add(new Layer(machines, productTypesNo, learningTurn));
         }
 
-        return new Model(layers, productTypesNo, turnLimit, queueSize);
+        return new Model(layers, costs, productTypesNo, turnLimit, queueSize);
     }
 
     /** Reads machines configuration from file */
