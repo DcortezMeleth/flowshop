@@ -10,6 +10,8 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.SparseInstance;
 
+import java.util.Random;
+
 /**
  * Machine processing tasks
  *
@@ -45,25 +47,6 @@ public class Machine extends MachineConf {
         assignClassifier(conf.classifierName);
 
         this.trainSet = new Instances("TrainSet", attributes, 0);
-    }
-
-    /** Assigns classifier based on its name from config */
-    private void assignClassifier(final String classifierName) {
-        switch (classifierName) {
-            case "J48":
-                this.classifier = new J48();
-                break;
-            case "JRip":
-                this.classifier = new JRip();
-                break;
-            case "BayesNet":
-                this.classifier = new BayesNet();
-                break;
-            case "NaiveBayes":
-            default:
-                this.classifier = new NaiveBayes();
-                break;
-        }
     }
 
     /**
@@ -119,14 +102,45 @@ public class Machine extends MachineConf {
         this.productType = result;
     }
 
-    /**
-     * Adds sample to {@link #trainSet} dataset.
-     */
+    /** Adds sample to {@link #trainSet} dataset. */
     public void addTrainData() {
         Instance instance = new SparseInstance(4);
         //TODO: set data into instance
 
         this.trainSet.add(instance);
+    }
+
+    /**
+     * Checks if machine should break this turn
+     *
+     * @return product type which machine was working on, -1 if it was idle
+     */
+    public int isMachineBroken() {
+        //check if machine should break
+        if (new Random().nextInt(100) > 5) {
+            return -1;
+        }
+
+        return this.turnsLeft >= 0 && this.productType >= 0 ? this.productType : -1;
+    }
+
+    /** Assigns classifier based on its name from config */
+    private void assignClassifier(final String classifierName) {
+        switch (classifierName) {
+            case "J48":
+                this.classifier = new J48();
+                break;
+            case "JRip":
+                this.classifier = new JRip();
+                break;
+            case "BayesNet":
+                this.classifier = new BayesNet();
+                break;
+            case "NaiveBayes":
+            default:
+                this.classifier = new NaiveBayes();
+                break;
+        }
     }
 
     /** Choses action based on their probabilities */

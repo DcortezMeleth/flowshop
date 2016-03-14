@@ -33,6 +33,7 @@ public class Layer {
 
     /** Simulates one turn for layer */
     public int[] tick(final int turnNo, final int[] newTasks) throws Exception {
+        //TODO: adding training examples
         //add new tasks to queue
         for (int i = 0; i < this.tasksQueue.length; i++) {
             this.tasksQueue[i] += newTasks[i];
@@ -54,7 +55,7 @@ public class Layer {
         }
 
         //chance for changing processing product type
-        for(Machine machine : this.machines){
+        for (Machine machine : this.machines) {
             machine.decideOnAction();
         }
 
@@ -67,6 +68,12 @@ public class Layer {
                         break;
                     }
                 }
+            }
+
+            int product = machine.isMachineBroken();
+            if(product > 0) {
+                this.tasksQueue[product] += 1;
+                continue;
             }
 
             machine.tick();

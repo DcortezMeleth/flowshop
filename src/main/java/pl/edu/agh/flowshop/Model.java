@@ -3,7 +3,9 @@ package pl.edu.agh.flowshop;
 import com.google.common.collect.EvictingQueue;
 import org.apache.commons.math3.distribution.PoissonDistribution;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Queue;
 
 /**
  * Represents whole model in experiment.
@@ -34,23 +36,6 @@ public class Model {
         this.productTypesNo = productTypesNo;
         this.turnsLimit = turnsLimit;
         this.queueSize = queueSize;
-    }
-
-    /** Method generates new order. */
-    private Order generateOrder() {
-        PoissonDistribution random = new PoissonDistribution(3);
-        int[] order = new int[this.productTypesNo];
-
-        int reward = 0;
-        for (int i = 0; i < this.productTypesNo; i++) {
-            order[i] = random.sample();
-            reward += order[i] * this.costs.get(i);
-        }
-
-        int penalty = random.sample();
-        penalty = penalty > 0 ? penalty : 0;
-
-        return new Order(order, random.sample() + 3, reward, penalty);
     }
 
     /** Experiment main loop */
@@ -92,9 +77,10 @@ public class Model {
 
     /**
      * Removes orders from queue when all products are ready
+     *
      * @return reward for completed orders
      */
-    public int deliverOrders(final Queue<Order> orders, final int[] finishedProducts) {
+    private int deliverOrders(final Queue<Order> orders, final int[] finishedProducts) {
         int reward = 0;
         for (Order order : orders) {
             int[] product = order.getProductsList();
@@ -115,6 +101,23 @@ public class Model {
         }
 
         return reward;
+    }
+
+    /** Method generates new order. */
+    private Order generateOrder() {
+        PoissonDistribution random = new PoissonDistribution(3);
+        int[] order = new int[this.productTypesNo];
+
+        int reward = 0;
+        for (int i = 0; i < this.productTypesNo; i++) {
+            order[i] = random.sample();
+            reward += order[i] * this.costs.get(i);
+        }
+
+        int penalty = random.sample();
+        penalty = penalty > 0 ? penalty : 0;
+
+        return new Order(order, random.sample() + 3, reward, penalty);
     }
 
 }
