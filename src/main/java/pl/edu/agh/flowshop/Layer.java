@@ -41,7 +41,7 @@ public class Layer {
         //collect finished products
         int[] finishedProducts = new int[tasksQueue.length];
         for (Machine machine : this.machines) {
-            if (machine.getProcessed() != null) {
+            if (machine.getProcessed() > 0) {
                 finishedProducts[machine.getProcessed()] += 1;
             }
         }

@@ -88,7 +88,6 @@ public class ConfigReader {
     private static void getConfig(final Properties properties) {
         try {
             properties.load(new ResourceFileReader().getResourcesFileStream(PROPERTIES_FILE));
-            System.out.println(properties.getProperty(ConfigReader.LEARNING_TURN_KEY));
         } catch (IOException e) {
             e.printStackTrace();
         }

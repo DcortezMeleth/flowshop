@@ -1,5 +1,7 @@
 package pl.edu.agh;
 
+import pl.edu.agh.flowshop.Model;
+import pl.edu.agh.utils.ConfigReader;
 import pl.edu.agh.utils.ResourceFileReader;
 import weka.classifiers.bayes.NaiveBayes;
 import weka.core.*;
@@ -16,7 +18,7 @@ public class Experiment {
     public static void main(String[] args) {
         ResourceFileReader reader = new ResourceFileReader();
         try {
-            BufferedReader bufferedReader = new BufferedReader(new FileReader(reader.getResourcesFile("example.arff")));
+            /*BufferedReader bufferedReader = new BufferedReader(new FileReader(reader.getResourcesFile("example.arff")));
 
             Instances train = new Instances(bufferedReader);
             train.setClassIndex(train.numAttributes() - 1);
@@ -64,13 +66,17 @@ public class Experiment {
             double val = naiveBayes.classifyInstance(instance);
 
             System.out.println(result[0] + " " + result[1]);
-            System.out.println(data.classAttribute().value((int) val));
+            System.out.println(data.classAttribute().value((int) val));*/
 
 
             //Evaluation evaluation = new Evaluation(train);
             //evaluation.crossValidateModel(naiveBayes, train, 10, new Debug.Random(1));
             //System.out.println(evaluation.toSummaryString("\nResults\n=========\n", true));
             //System.out.println(evaluation.fMeasure(1) + " " + evaluation.precision(1) + " " + evaluation.recall(1));
+
+
+            Model model = ConfigReader.createModel();
+            model.run();
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -34,10 +34,10 @@ public class Machine extends MachineConf {
     private Instances trainSet;
 
     /** Type of processed product */
-    private Integer productType;
+    private int productType;
 
     /** Turns left for product to be processed */
-    private Integer turnsLeft;
+    private int turnsLeft;
 
     /** Constructor using configuration object. */
     public Machine(final MachineConf conf) {
@@ -85,8 +85,8 @@ public class Machine extends MachineConf {
     }
 
     /** Returns type of processed product. */
-    public Integer getProcessed() {
-        return turnsLeft == 0 ? productType : null;
+    public int getProcessed() {
+        return turnsLeft == 0 ? productType : -1;
     }
 
     /** Fires learning process for this machine */
