@@ -2,9 +2,9 @@ package pl.edu.agh.flowshop;
 
 import com.google.common.collect.EvictingQueue;
 import org.apache.commons.math3.distribution.PoissonDistribution;
+import pl.edu.agh.utils.Parameters;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Queue;
 
 /**
@@ -18,37 +18,21 @@ public class Model {
     /** List of machine layers */
     private final List<Layer> layers;
 
-    /** Unit prices for products */
-    private final Map<Integer, Integer> costs;
-
-    /** Number of product types used in experiment. */
-    private final int productTypesNo;
-
-    /** Turn limit for experiment */
-    private final int turnsLimit;
-
-    /** Maximum size of orders queue */
-    private final int queueSize;
-
-    public Model(final List<Layer> layers, final Map<Integer, Integer> costs, final int productTypesNo, final int turnsLimit, final int queueSize) {
+    public Model(final List<Layer> layers) {
         this.layers = layers;
-        this.costs = costs;
-        this.productTypesNo = productTypesNo;
-        this.turnsLimit = turnsLimit;
-        this.queueSize = queueSize;
     }
 
     /** Experiment main loop */
     public void run() throws Exception {
         PoissonDistribution random = new PoissonDistribution(3);
-        Queue<Order> orders = EvictingQueue.create(this.queueSize);
+        Queue<Order> orders = EvictingQueue.create(Parameters.QUEUE_SIZE);
         Order order;
         int[] products;
-        int[] finishedProducts = new int[this.productTypesNo];
+        int[] finishedProducts = new int[Parameters.PRODUCT_TYPES_NO];
         int newOrderTurn = random.sample();
 
         //main loop
-        for (int turnNo = 0; turnNo < this.turnsLimit; turnNo++) {
+        for (int turnNo = 0; turnNo < Parameters.TURN_LIMIT; turnNo++) {
 
             //generate new order
             if (turnNo == newOrderTurn) {
@@ -57,7 +41,7 @@ public class Model {
                 products = order.getProductsList();
                 newOrderTurn += random.sample();
             } else {
-                products = new int[this.productTypesNo];
+                products = new int[Parameters.PRODUCT_TYPES_NO];
             }
 
             //execute turn across layers
@@ -66,7 +50,7 @@ public class Model {
             }
 
             //collect finished products
-            for (int i = 0; i < this.productTypesNo; i++) {
+            for (int i = 0; i < Parameters.PRODUCT_TYPES_NO; i++) {
                 finishedProducts[i] += products[i];
             }
 
@@ -106,12 +90,12 @@ public class Model {
     /** Method generates new order. */
     private Order generateOrder() {
         PoissonDistribution random = new PoissonDistribution(3);
-        int[] order = new int[this.productTypesNo];
+        int[] order = new int[Parameters.PRODUCT_TYPES_NO];
 
         int reward = 0;
-        for (int i = 0; i < this.productTypesNo; i++) {
+        for (int i = 0; i < Parameters.PRODUCT_TYPES_NO; i++) {
             order[i] = random.sample();
-            reward += order[i] * this.costs.get(i);
+            reward += order[i] * Parameters.COSTS.get(i);
         }
 
         int penalty = random.sample();

@@ -1,5 +1,7 @@
 package pl.edu.agh.flowshop;
 
+import pl.edu.agh.utils.Parameters;
+
 import java.util.List;
 
 /**
@@ -9,9 +11,6 @@ import java.util.List;
  *         Created on 2016-03-09.
  */
 public class Layer {
-
-    /** Number of turn between learning process */
-    private final int learningTurn;
 
     /** {@link Machine Machines} in layer. */
     private List<Machine> machines;
@@ -23,12 +22,10 @@ public class Layer {
      * Constructor.
      *
      * @param machines       list of {@link Machine} objects in layer
-     * @param productTypesNo number of types of product used in simulation
      */
-    public Layer(final List<Machine> machines, final int productTypesNo, final int learningTurn) {
+    public Layer(final List<Machine> machines) {
         this.machines = machines;
-        this.tasksQueue = new int[productTypesNo];
-        this.learningTurn = learningTurn;
+        this.tasksQueue = new int[Parameters.PRODUCT_TYPES_NO];
     }
 
     /** Simulates one turn for layer */
@@ -48,7 +45,7 @@ public class Layer {
         }
 
         //train on collected data
-        if (turnNo % this.learningTurn == 0) {
+        if (turnNo % Parameters.LEARNING_TURN == 0) {
             for (Machine machine : this.machines) {
                 machine.train();
             }

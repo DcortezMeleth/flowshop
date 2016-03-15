@@ -2,6 +2,7 @@ package pl.edu.agh;
 
 import pl.edu.agh.flowshop.Model;
 import pl.edu.agh.utils.ConfigReader;
+import pl.edu.agh.utils.Parameters;
 import pl.edu.agh.utils.ResourceFileReader;
 import weka.classifiers.bayes.NaiveBayes;
 import weka.core.*;
@@ -76,7 +77,9 @@ public class Experiment {
 
 
             Model model = ConfigReader.createModel();
-            model.run();
+            //model.run();
+
+            System.out.println(Parameters.PRODUCT_TYPES_NO);
         } catch (Exception e) {
             e.printStackTrace();
         }
