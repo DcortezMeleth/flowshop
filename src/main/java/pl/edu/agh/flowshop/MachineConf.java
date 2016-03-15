@@ -24,17 +24,9 @@ public class MachineConf {
 
     protected String classifierName = "";
 
-    public MachineConf() {
-    }
-
     public MachineConf(final int machineId, final Map<Integer, Integer> timeTable) {
         this.machineId = machineId;
         this.timeTable = timeTable;
     }
 
-    public MachineConf(final int machineId, final Map<Integer, Integer> timeTable, final String classifierName) {
-        this.machineId = machineId;
-        this.timeTable = timeTable;
-        this.classifierName = classifierName;
-    }
 }

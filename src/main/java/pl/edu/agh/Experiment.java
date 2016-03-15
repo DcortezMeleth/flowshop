@@ -77,7 +77,7 @@ public class Experiment {
 
 
             Model model = ConfigReader.createModel();
-            //model.run();
+            model.run();
 
             System.out.println(Parameters.PRODUCT_TYPES_NO);
         } catch (Exception e) {
