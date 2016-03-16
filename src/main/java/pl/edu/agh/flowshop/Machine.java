@@ -43,7 +43,7 @@ public class Machine extends MachineConf {
 
     /** Constructor using configuration object. */
     public Machine(final MachineConf conf) {
-        super(conf.machineId, conf.timeTable);
+        super(conf.timeTable);
         assignClassifier(conf.classifierName);
 
         this.trainSet = new Instances("TrainSet", attributes, 0);
@@ -80,13 +80,23 @@ public class Machine extends MachineConf {
     /**
      * Classifies given example based on {@link #classifier} decision.
      *
+     * @param action choosen action, -1 if machine should choose itself
      * @throws Exception
      */
-    public void decideOnAction() throws Exception {
+    public void decideOnAction(int action) throws Exception {
         //zmienic typ mozemy tylko gdy aktualnie czegos nie przetwarzamy
         if (this.turnsLeft != 0) {
             return;
         }
+        int result = action >= 0 ? action : getAction();
+        if (result != this.productType) {
+            this.turnsLeft++;
+        }
+        this.productType = result;
+    }
+
+    /** Return number of product which should be worked on */
+    protected int getAction() throws Exception {
         Instance instance = new SparseInstance(4);
         //TODO: set data into instance
 
@@ -95,11 +105,7 @@ public class Machine extends MachineConf {
         instance.setDataset(data);
 
         double[] probabilities = this.classifier.distributionForInstance(instance);
-        int result = chooseAction(probabilities);
-        if (result != this.productType) {
-            this.turnsLeft++;
-        }
-        this.productType = result;
+        return chooseActionFromPropabilities(probabilities);
     }
 
     /** Adds sample to {@link #trainSet} dataset. */
@@ -144,7 +150,7 @@ public class Machine extends MachineConf {
     }
 
     /** Choses action based on their probabilities */
-    private int chooseAction(final double[] propabilities) {
+    private int chooseActionFromPropabilities(final double[] propabilities) {
         int result = 0;
         //TODO strategia wyboru?
 

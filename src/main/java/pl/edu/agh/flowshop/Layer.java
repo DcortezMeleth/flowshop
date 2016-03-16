@@ -10,7 +10,7 @@ import java.util.List;
  * @author Bartosz
  *         Created on 2016-03-09.
  */
-public class Layer {
+public class Layer extends Machine {
 
     /** {@link Machine Machines} in layer. */
     private List<Machine> machines;
@@ -21,16 +21,16 @@ public class Layer {
     /**
      * Constructor.
      *
-     * @param machines       list of {@link Machine} objects in layer
+     * @param machines list of {@link Machine} objects in layer
      */
-    public Layer(final List<Machine> machines) {
+    public Layer(final List<Machine> machines, final MachineConf conf) {
+        super(conf);
         this.machines = machines;
         this.tasksQueue = new int[Parameters.PRODUCT_TYPES_NO];
     }
 
     /** Simulates one turn for layer */
     public int[] tick(final int turnNo, final int[] newTasks) throws Exception {
-        //TODO: adding training examples
         //add new tasks to queue
         for (int i = 0; i < this.tasksQueue.length; i++) {
             this.tasksQueue[i] += newTasks[i];
@@ -45,16 +45,10 @@ public class Layer {
         }
 
         //train on collected data
-        if (turnNo % Parameters.LEARNING_TURN == 0) {
-            for (Machine machine : this.machines) {
-                machine.train();
-            }
-        }
+        learn(turnNo);
 
         //chance for changing processing product type
-        for (Machine machine : this.machines) {
-            machine.decideOnAction();
-        }
+        decide();
 
         //offer tasks to machines and tick
         for (Machine machine : this.machines) {
@@ -68,7 +62,7 @@ public class Layer {
             }
 
             int product = machine.isMachineBroken();
-            if(product > 0) {
+            if (product > 0) {
                 this.tasksQueue[product] += 1;
                 continue;
             }
@@ -77,5 +71,34 @@ public class Layer {
         }
 
         return finishedProducts;
+    }
+
+    /** Chooses action for every machine */
+    private void decide() throws Exception {
+        for (Machine machine : this.machines) {
+            if (Parameters.MACHINE.equals(Parameters.LEARNING_LAYER)) {
+                machine.decideOnAction(-1);
+            } else if (Parameters.LAYER.equals(Parameters.LEARNING_LAYER)) {
+                machine.decideOnAction(getAction());
+            }
+        }
+
+    }
+
+    /** Fires learning in apropriate layer */
+    private void learn(final int turnNo) throws Exception {
+        if (turnNo % Parameters.LEARNING_TURN == 0) {
+            if (Parameters.MACHINE.equals(Parameters.LEARNING_LAYER)) {
+                for (Machine machine : this.machines) {
+                    machine.train();
+                }
+            } else if (Parameters.LAYER.equals(Parameters.LEARNING_LAYER)) {
+                train();
+            }
+        }
+    }
+
+    public List<Machine> getMachines() {
+        return machines;
     }
 }

@@ -23,6 +23,21 @@ public abstract class Parameters {
     /** Product types no. value in properties file. */
     public static final int PRODUCT_TYPES_NO;
 
+    /**
+     * Key for learning layer in properties file.
+     * Value is equal {@link #MACHINE}, {@link #LAYER} or {@link #SYSTEM}.
+     */
+    public static final String LEARNING_LAYER;
+
+    /** Layer level of learning. */
+    public static final String MACHINE = "MACHINE";
+
+    /** Layer level of learning. */
+    public static final String LAYER = "LAYER";
+
+    /** Layer level of learning. */
+    public static final String SYSTEM = "SYSTEM";
+
     /** Products unit costs */
     public static final Map<Integer, Integer> COSTS;
 
@@ -41,6 +56,9 @@ public abstract class Parameters {
     /** Key for product types no. value in properties file. */
     private static final String PRODUCT_PRICE_KEY = "PRODUCT_PRICE_";
 
+    /** Key for learning layer in properties file. */
+    private static final String LEARNING_LAYER_KEY = "LEARNING_LAYER";
+
     /** File with experiment configuration */
     private static final String PROPERTIES_FILE_KEY = "flowshop.properties";
 
@@ -52,6 +70,7 @@ public abstract class Parameters {
         TURN_LIMIT = Integer.parseInt(configuration.getProperty(TURN_LIMIT_KEY));
         QUEUE_SIZE = Integer.parseInt(configuration.getProperty(QUEUE_SIZE_KEY));
         PRODUCT_TYPES_NO = Integer.parseInt(configuration.getProperty(PRODUCT_TYPES_NO_KEY));
+        LEARNING_LAYER = configuration.getProperty(LEARNING_LAYER_KEY);
 
         COSTS = new HashMap<>();
         for (int i = 1; i <= PRODUCT_TYPES_NO; i++) {

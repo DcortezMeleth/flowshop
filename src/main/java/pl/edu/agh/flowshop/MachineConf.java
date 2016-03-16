@@ -10,9 +10,6 @@ import java.util.Map;
  */
 public class MachineConf {
 
-    /** Machine No. */
-    protected int machineId;
-
     /**
      * Machine configuration in form of map: </br>
      * <li>
@@ -24,8 +21,7 @@ public class MachineConf {
 
     protected String classifierName = "";
 
-    public MachineConf(final int machineId, final Map<Integer, Integer> timeTable) {
-        this.machineId = machineId;
+    public MachineConf(final Map<Integer, Integer> timeTable) {
         this.timeTable = timeTable;
     }
 

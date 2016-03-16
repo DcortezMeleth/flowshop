@@ -55,7 +55,7 @@ public class Model {
             }
 
             //remove finished orders
-            deliverOrders(orders, finishedProducts);
+            deliverOrders(layers, orders, finishedProducts);
         }
     }
 
@@ -64,27 +64,43 @@ public class Model {
      *
      * @return reward for completed orders
      */
-    private int deliverOrders(final Queue<Order> orders, final int[] finishedProducts) {
+    private int deliverOrders(final List<Layer> layers, final Queue<Order> orders, final int[] finishedProducts) {
         int reward = 0;
-        for (Order order : orders) {
+        for(int i=0; i<orders.size(); i++) {
+            Order order = orders.element();
             int[] product = order.getProductsList();
-            for (int i = 0; i < finishedProducts.length; i++) {
+            for (int j = 0; j < finishedProducts.length; j++) {
                 //not enough product -> we are finished
-                if (product[i] > finishedProducts[i]) {
+                if (product[j] > finishedProducts[j]) {
                     return reward;
                 }
             }
 
             //order finished -> remove from queue
-            for (int i = 0; i < finishedProducts.length; i++) {
-                finishedProducts[i] -= product[i];
+            for (int j = 0; j < finishedProducts.length; j++) {
+                finishedProducts[j] -= product[j];
             }
             orders.poll();
+
+            addTrainingExample(layers);
 
             reward += order.getReward();
         }
 
         return reward;
+    }
+
+    /** Adds training example in appropriate places */
+    private void addTrainingExample(final List<Layer> layers) {
+        for(Layer layer : layers) {
+            if (Parameters.MACHINE.equals(Parameters.LEARNING_LAYER)) {
+                for(Machine machine : layer.getMachines()) {
+                    machine.addTrainData();
+                }
+            } else if (Parameters.LAYER.equals(Parameters.LEARNING_LAYER)) {
+                layer.addTrainData();
+            }
+        }
     }
 
     /** Method generates new order. */
