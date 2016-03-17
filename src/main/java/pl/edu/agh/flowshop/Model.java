@@ -13,12 +13,13 @@ import java.util.Queue;
  * @author Bartosz Sądel
  *         Created on 11.03.2016.
  */
-public class Model {
+public class Model extends LearningAgent {
 
     /** List of machine layers */
     private final List<Layer> layers;
 
-    public Model(final List<Layer> layers) {
+    public Model(final List<Layer> layers, final String classifierName) {
+        super(classifierName, layers, Parameters.MODEL);
         this.layers = layers;
     }
 
@@ -55,7 +56,7 @@ public class Model {
             }
 
             //remove finished orders
-            deliverOrders(layers, orders, finishedProducts);
+            deliverOrders(orders, finishedProducts);
         }
     }
 
@@ -64,7 +65,7 @@ public class Model {
      *
      * @return reward for completed orders
      */
-    private int deliverOrders(final List<Layer> layers, final Queue<Order> orders, final int[] finishedProducts) {
+    private int deliverOrders(final Queue<Order> orders, final int[] finishedProducts) throws Exception {
         int reward = 0;
         for(int i=0; i<orders.size(); i++) {
             Order order = orders.element();
@@ -82,7 +83,8 @@ public class Model {
             }
             orders.poll();
 
-            addTrainingExample(layers);
+            train();
+            addTrainData();
 
             reward += order.getReward();
         }
@@ -90,18 +92,11 @@ public class Model {
         return reward;
     }
 
-    /** Adds training example in appropriate places */
-    private void addTrainingExample(final List<Layer> layers) {
-        for(Layer layer : layers) {
-            if (Parameters.MACHINE.equals(Parameters.LEARNING_LAYER)) {
-                for(Machine machine : layer.getMachines()) {
-                    machine.addTrainData();
-                }
-            } else if (Parameters.LAYER.equals(Parameters.LEARNING_LAYER)) {
-                layer.addTrainData();
-            }
-        }
+    @Override
+    protected void decideOnAction(final int action) throws Exception {
+
     }
+
 
     /** Method generates new order. */
     private Order generateOrder() {
@@ -111,7 +106,7 @@ public class Model {
         int reward = 0;
         for (int i = 0; i < Parameters.PRODUCT_TYPES_NO; i++) {
             order[i] = random.sample();
-            reward += order[i] * Parameters.COSTS.get(i);
+            reward += order[i] * Parameters.COSTS.get(i+1);
         }
 
         int penalty = random.sample();

@@ -5,7 +5,6 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import pl.edu.agh.flowshop.Layer;
 import pl.edu.agh.flowshop.Machine;
-import pl.edu.agh.flowshop.MachineConf;
 import pl.edu.agh.flowshop.Model;
 
 import java.io.IOException;
@@ -29,25 +28,21 @@ public class ConfigReader {
     /** Creates model based on config files */
     public static Model createModel() {
 
-        List<List<MachineConf>> machinesConf = getMachinesConfig();
+        List<List<Machine>> machinesConf = getMachinesConfig();
 
         List<Layer> layers = new ArrayList<>();
-        for (List<MachineConf> configurations : machinesConf) {
-            List<Machine> machines = new ArrayList<>();
-            for (MachineConf machineConf : configurations) {
-                machines.add(new Machine(machineConf));
-            }
-            layers.add(new Layer(machines));
+        for (List<Machine> machines : machinesConf) {
+            layers.add(new Layer(machines, ""));
         }
 
-        return new Model(layers);
+        return new Model(layers, "");
     }
 
     /** Reads machines configuration from file */
-    private static List<List<MachineConf>> getMachinesConfig() {
+    private static List<List<Machine>> getMachinesConfig() {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         try (Reader reader = new InputStreamReader(new ResourceFileReader().getResourcesFileStream("machines.json"))) {
-            Type type = new TypeToken<List<List<MachineConf>>>() {
+            Type type = new TypeToken<List<List<Machine>>>() {
 
             }.getType();
             return gson.fromJson(reader, type);

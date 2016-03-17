@@ -1,15 +1,10 @@
 package pl.edu.agh.flowshop;
 
-import weka.classifiers.Classifier;
-import weka.classifiers.bayes.BayesNet;
-import weka.classifiers.bayes.NaiveBayes;
-import weka.classifiers.rules.JRip;
-import weka.classifiers.trees.J48;
-import weka.core.FastVector;
-import weka.core.Instance;
+import pl.edu.agh.utils.Parameters;
 import weka.core.Instances;
-import weka.core.SparseInstance;
 
+import java.util.ArrayList;
+import java.util.Map;
 import java.util.Random;
 
 /**
@@ -18,34 +13,27 @@ import java.util.Random;
  * @author Bartosz Sądel
  *         Created on 02.02.2016.
  */
-public class Machine extends MachineConf {
-
-    /** Vector of {@link weka.core.Attribute Attributes} used for learning */
-    private final static FastVector attributes;
-
-    /** Initialization of attributes for learning process */
-    static {
-        attributes = new FastVector(1);
-        //TODO: Set attributes
-    }
-
-    /** Classifier used for machine to learn */
-    private Classifier classifier;
-
-    /** Train set used to teach {@link #classifier} */
-    private Instances trainSet;
+public class Machine extends LearningAgent {
 
     /** Type of processed product */
-    private int productType;
+    protected int productType;
 
     /** Turns left for product to be processed */
-    private int turnsLeft;
+    protected int turnsLeft;
+
+    /**
+     * Machine configuration in form of map: </br>
+     * <li>
+     * <ul>key - product type</ul>
+     * <ul>value - processing time</ul>
+     * </li>
+     */
+    protected Map<Integer, Integer> timeTable;
 
     /** Constructor using configuration object. */
-    public Machine(final MachineConf conf) {
-        super(conf.timeTable);
-        assignClassifier(conf.classifierName);
-
+    public Machine(final Map<Integer, Integer> timeTable, final String classifierName) {
+        super(classifierName, new ArrayList<LearningAgent>(), Parameters.MACHINE);
+        this.timeTable = timeTable;
         this.trainSet = new Instances("TrainSet", attributes, 0);
     }
 
@@ -62,58 +50,14 @@ public class Machine extends MachineConf {
         return true;
     }
 
-    /** Decrements a counter of {@link #turnsLeft}. Used on begining of a turn. */
-    public void tick() {
-        this.turnsLeft--;
-    }
-
     /** Returns type of processed product. */
     public int getProcessed() {
         return turnsLeft == 0 ? productType : -1;
     }
 
-    /** Fires learning process for this machine */
-    public void train() throws Exception {
-        this.classifier.buildClassifier(this.trainSet);
-    }
-
-    /**
-     * Classifies given example based on {@link #classifier} decision.
-     *
-     * @param action choosen action, -1 if machine should choose itself
-     * @throws Exception
-     */
-    public void decideOnAction(int action) throws Exception {
-        //zmienic typ mozemy tylko gdy aktualnie czegos nie przetwarzamy
-        if (this.turnsLeft != 0) {
-            return;
-        }
-        int result = action >= 0 ? action : getAction();
-        if (result != this.productType) {
-            this.turnsLeft++;
-        }
-        this.productType = result;
-    }
-
-    /** Return number of product which should be worked on */
-    protected int getAction() throws Exception {
-        Instance instance = new SparseInstance(4);
-        //TODO: set data into instance
-
-        Instances data = new Instances("Test", attributes, 0);
-        data.setClassIndex(data.numAttributes() - 1);
-        instance.setDataset(data);
-
-        double[] probabilities = this.classifier.distributionForInstance(instance);
-        return chooseActionFromPropabilities(probabilities);
-    }
-
-    /** Adds sample to {@link #trainSet} dataset. */
-    public void addTrainData() {
-        Instance instance = new SparseInstance(4);
-        //TODO: set data into instance
-
-        this.trainSet.add(instance);
+    /** Decrements a counter of {@link #turnsLeft}. Used on begining of a turn. */
+    public void tick() {
+        this.turnsLeft--;
     }
 
     /**
@@ -130,30 +74,17 @@ public class Machine extends MachineConf {
         return this.turnsLeft >= 0 && this.productType >= 0 ? this.productType : -1;
     }
 
-    /** Assigns classifier based on its name from config */
-    private void assignClassifier(final String classifierName) {
-        switch (classifierName) {
-            case "J48":
-                this.classifier = new J48();
-                break;
-            case "JRip":
-                this.classifier = new JRip();
-                break;
-            case "BayesNet":
-                this.classifier = new BayesNet();
-                break;
-            case "NaiveBayes":
-            default:
-                this.classifier = new NaiveBayes();
-                break;
+    @Override
+    protected void decideOnAction(final int action) throws Exception {
+        //zmienic typ mozemy tylko gdy aktualnie czegos nie przetwarzamy
+        if (this.turnsLeft != 0) {
+            return;
         }
+        int result = action >= 0 ? action : getAction();
+        if (result != this.productType) {
+            this.turnsLeft++;
+        }
+        this.productType = result;
     }
 
-    /** Choses action based on their probabilities */
-    private int chooseActionFromPropabilities(final double[] propabilities) {
-        int result = 0;
-        //TODO strategia wyboru?
-
-        return 0;
-    }
 }
