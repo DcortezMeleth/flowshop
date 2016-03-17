@@ -15,12 +15,11 @@ import java.util.Queue;
  */
 public class Model extends LearningAgent {
 
-    /** List of machine layers */
-    private final List<Layer> layers;
+    /** Buffor of finished products waiting for delivery */
+    private int[] finishedProducts = new int[Parameters.PRODUCT_TYPES_NO];
 
     public Model(final List<Layer> layers, final String classifierName) {
         super(classifierName, layers, Parameters.MODEL);
-        this.layers = layers;
     }
 
     /** Experiment main loop */
@@ -29,7 +28,6 @@ public class Model extends LearningAgent {
         Queue<Order> orders = EvictingQueue.create(Parameters.QUEUE_SIZE);
         Order order;
         int[] products;
-        int[] finishedProducts = new int[Parameters.PRODUCT_TYPES_NO];
         int newOrderTurn = random.sample();
 
         //main loop
@@ -45,19 +43,23 @@ public class Model extends LearningAgent {
                 products = new int[Parameters.PRODUCT_TYPES_NO];
             }
 
-            //execute turn across layers
-            for (Layer layer : this.layers) {
-                products = layer.tick(turnNo, products);
-            }
-
-            //collect finished products
-            for (int i = 0; i < Parameters.PRODUCT_TYPES_NO; i++) {
-                finishedProducts[i] += products[i];
-            }
+            //execute turn across layers and collect finished products
+            addProducts(this.finishedProducts, tick(turnNo, products));
 
             //remove finished orders
             deliverOrders(orders, finishedProducts);
         }
+    }
+
+    @Override
+    protected int[] tick(final int turnNo, final int[] products) throws Exception {
+        //execute turn across layers
+        int[] products1 = products;
+        for (LearningAgent layer : getAgents()) {
+            products1 = layer.tick(turnNo, products1);
+        }
+
+        return products1;
     }
 
     /**
@@ -67,7 +69,7 @@ public class Model extends LearningAgent {
      */
     private int deliverOrders(final Queue<Order> orders, final int[] finishedProducts) throws Exception {
         int reward = 0;
-        for(int i=0; i<orders.size(); i++) {
+        for (int i = 0; i < orders.size(); i++) {
             Order order = orders.element();
             int[] product = order.getProductsList();
             for (int j = 0; j < finishedProducts.length; j++) {
@@ -92,12 +94,6 @@ public class Model extends LearningAgent {
         return reward;
     }
 
-    @Override
-    protected void decideOnAction(final int action) throws Exception {
-
-    }
-
-
     /** Method generates new order. */
     private Order generateOrder() {
         PoissonDistribution random = new PoissonDistribution(3);
@@ -106,7 +102,7 @@ public class Model extends LearningAgent {
         int reward = 0;
         for (int i = 0; i < Parameters.PRODUCT_TYPES_NO; i++) {
             order[i] = random.sample();
-            reward += order[i] * Parameters.COSTS.get(i+1);
+            reward += order[i] * Parameters.COSTS.get(i + 1);
         }
 
         int penalty = random.sample();

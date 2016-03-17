@@ -12,6 +12,7 @@ import weka.core.Instances;
 import weka.core.SparseInstance;
 
 import java.util.List;
+import java.util.Random;
 
 /**
  * Abstract class containing everything what learning agent will need.
@@ -24,22 +25,22 @@ public abstract class LearningAgent {
     /** Vector of {@link weka.core.Attribute Attributes} used for learning */
     protected final static FastVector attributes;
 
-    /** learning level -> machine = -1, layer = -2, model=-3 */
-    protected final int level;
-
     /** Initialization of attributes for learning process */
     static {
         attributes = new FastVector(1);
         //TODO: Set attributes
     }
 
-    private final List<? extends LearningAgent> agents;
+    /** learning level -> machine = -1, layer = -2, model=-3 */
+    protected final int level;
+
+    protected final List<? extends LearningAgent> agents;
 
     /** Classifier name */
     protected String classifierName = "";
 
     /** Train set used to teach {@link #classifier} */
-    protected Instances trainSet;
+    protected Instances trainSet; //TODO: initialize with attributes
 
     /** Classifier used for machine to learn */
     private Classifier classifier;
@@ -48,6 +49,13 @@ public abstract class LearningAgent {
         this.classifierName = classifierName;
         this.agents = agents;
         this.level = level;
+    }
+
+    /** Simulates one turn for agent */
+    protected abstract int[] tick(final int turnNo, final int[] newTasks) throws Exception;
+
+    protected List<? extends LearningAgent> getAgents() {
+        return agents;
     }
 
     /**
@@ -76,6 +84,10 @@ public abstract class LearningAgent {
         //TODO: set data into instance
 
         this.trainSet.add(instance);
+
+        for (LearningAgent agent : getAgents()) {
+            agent.addTrainData();
+        }
     }
 
     /** Returns classifier */
@@ -89,7 +101,7 @@ public abstract class LearningAgent {
 
     /** Return number of product which should be worked on */
     protected int getAction() throws Exception {
-        if(this.level != Parameters.LEARNING_LEVEL) {
+        if (this.level != Parameters.LEARNING_LEVEL) {
             return this.level;
         }
 
@@ -102,6 +114,13 @@ public abstract class LearningAgent {
 
         double[] probabilities = getClassifier().distributionForInstance(instance);
         return chooseActionFromPropabilities(probabilities);
+    }
+
+    /** Adds products from list2 to list1 */
+    protected void addProducts(final int[] list1, final int[] list2) {
+        for (int i = 0; i < Parameters.PRODUCT_TYPES_NO; i++) {
+            list1[i] += list2[i];
+        }
     }
 
     /** Assigns classifier based on its name from config */
@@ -125,9 +144,21 @@ public abstract class LearningAgent {
 
     /** Choses action based on their probabilities */
     private int chooseActionFromPropabilities(final double[] propabilities) {
-        int result = 0;
-        //TODO strategia wyboru?
+        Random random = new Random();
 
-        return 0;
+        //eksploracja
+        if(random.nextInt(100) < 5) {
+            return random.nextInt(Parameters.PRODUCT_TYPES_NO);
+        }
+
+        int result = 0;
+        double highest = propabilities[0];
+        for(int i=1; i<Parameters.PRODUCT_TYPES_NO; i++) {
+            if(propabilities[i] > highest) {
+                result = i;
+                highest = propabilities[i];
+            }
+        }
+        return result;
     }
 }

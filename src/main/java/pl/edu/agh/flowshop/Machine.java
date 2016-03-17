@@ -16,7 +16,10 @@ import java.util.Random;
 public class Machine extends LearningAgent {
 
     /** Type of processed product */
-    protected int productType;
+    protected int productType = -1;
+
+    /** Type if product finished and waitning for delivery. -1 otherwise */
+    protected int finishedProduct = -1;
 
     /** Turns left for product to be processed */
     protected int turnsLeft;
@@ -30,7 +33,6 @@ public class Machine extends LearningAgent {
      */
     protected Map<Integer, Integer> timeTable;
 
-    /** Constructor using configuration object. */
     public Machine(final Map<Integer, Integer> timeTable, final String classifierName) {
         super(classifierName, new ArrayList<LearningAgent>(), Parameters.MACHINE);
         this.timeTable = timeTable;
@@ -38,48 +40,52 @@ public class Machine extends LearningAgent {
     }
 
     /**
-     * Starts processing product on this machine.
-     *
-     * @param productType type of product to process
-     */
-    public boolean processProduct(final int productType) {
-        if (this.turnsLeft != 0 || this.productType != productType) {
-            return false;
-        }
-        this.turnsLeft = this.timeTable.get(productType);
-        return true;
-    }
-
-    /** Returns type of processed product. */
-    public int getProcessed() {
-        return turnsLeft == 0 ? productType : -1;
-    }
-
-    /** Decrements a counter of {@link #turnsLeft}. Used on begining of a turn. */
-    public void tick() {
-        this.turnsLeft--;
-    }
-
-    /**
      * Checks if machine should break this turn
      *
      * @return product type which machine was working on, -1 if it was idle
      */
-    public int isMachineBroken() {
-        //check if machine should break
-        if (new Random().nextInt(100) > 5) {
-            return -1;
+    private boolean isMachineBroken() {
+        if(this.turnsLeft <= 0 || this.productType < 0) {
+            return false;
         }
 
-        return this.turnsLeft >= 0 && this.productType >= 0 ? this.productType : -1;
+        //check if machine should break
+        return new Random().nextInt(100) > 5;
+    }
+
+    @Override
+    protected int[] tick(final int trunNo, final int[] newTasks) throws Exception {
+        int[] processed = new int[Parameters.PRODUCT_TYPES_NO];
+        if(isMachineBroken()) {
+            //return processed prodcut to queue
+            newTasks[this.productType] += 1;
+            this.productType = -1;
+            this.turnsLeft = 1;
+            return processed;
+        }
+
+        if(this.finishedProduct > -1) {
+            processed[this.finishedProduct] += 1;
+            this.finishedProduct = -1;
+        }
+
+        this.turnsLeft--;
+        return processed;
     }
 
     @Override
     protected void decideOnAction(final int action) throws Exception {
         //zmienic typ mozemy tylko gdy aktualnie czegos nie przetwarzamy
-        if (this.turnsLeft != 0) {
+        if (this.turnsLeft > 0) {
             return;
         }
+
+        //jesli produkt skonczony to laduje w innym polu
+        if(this.productType > -1) {
+            this.finishedProduct = this.productType;
+        }
+
+        //sprawdzamy czy generujamy akcje czy wygenerowano ja wyzej
         int result = action >= 0 ? action : getAction();
         if (result != this.productType) {
             this.turnsLeft++;
