@@ -6,6 +6,8 @@ import java.util.Map;
 import java.util.Properties;
 
 /**
+ * Experiment parameters container
+ *
  * @author Bartosz
  *         Created on 2016-03-15.
  */
@@ -19,6 +21,12 @@ public abstract class Parameters {
 
     /** Queue size value in properties file. */
     public static final int QUEUE_SIZE;
+
+    /** Reward for completion od order */
+    public static final int REWARD;
+
+    /** Penalty for not completing order in time */
+    public static final double PENALTY;
 
     /** Product types no. value in properties file. */
     public static final int PRODUCT_TYPES_NO;
@@ -62,6 +70,12 @@ public abstract class Parameters {
     /** File with experiment configuration */
     private static final String PROPERTIES_FILE_KEY = "flowshop.properties";
 
+    /** Reward for completion od order */
+    private static final String REWARD_KEY = "REWARD";
+
+    /** Penalty for not completing order in time */
+    private static final String PENALTY_KEY = "PENALTY";
+
     static {
         Properties configuration = new Properties();
         getConfig(configuration);
@@ -71,6 +85,8 @@ public abstract class Parameters {
         QUEUE_SIZE = Integer.parseInt(configuration.getProperty(QUEUE_SIZE_KEY));
         PRODUCT_TYPES_NO = Integer.parseInt(configuration.getProperty(PRODUCT_TYPES_NO_KEY));
         LEARNING_LEVEL = Integer.parseInt(configuration.getProperty(LEARNING_LEVEL_KEY));
+        REWARD = Integer.parseInt(configuration.getProperty(REWARD_KEY));
+        PENALTY = Double.parseDouble(configuration.getProperty(PENALTY_KEY));
 
         COSTS = new HashMap<>();
         for (int i = 1; i <= PRODUCT_TYPES_NO; i++) {

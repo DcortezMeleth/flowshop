@@ -1,11 +1,13 @@
 package pl.edu.agh.flowshop;
 
-import com.google.common.collect.EvictingQueue;
+import com.google.common.collect.MinMaxPriorityQueue;
 import org.apache.commons.math3.distribution.PoissonDistribution;
+import pl.edu.agh.utils.OrderComparator;
 import pl.edu.agh.utils.Parameters;
 
 import java.util.List;
 import java.util.Queue;
+import java.util.Random;
 
 /**
  * Represents whole model in experiment.
@@ -15,7 +17,7 @@ import java.util.Queue;
  */
 public class Model extends LearningAgent {
 
-    /** Buffor of finished products waiting for delivery */
+    /** Buffer of finished products waiting for delivery */
     private int[] finishedProducts = new int[Parameters.PRODUCT_TYPES_NO];
 
     public Model(final List<Layer> layers, final String classifierName) {
@@ -25,7 +27,8 @@ public class Model extends LearningAgent {
     /** Experiment main loop */
     public void run() throws Exception {
         PoissonDistribution random = new PoissonDistribution(3);
-        Queue<Order> orders = EvictingQueue.create(Parameters.QUEUE_SIZE);
+        Queue<Order> orders =
+                MinMaxPriorityQueue.orderedBy(new OrderComparator()).maximumSize(Parameters.QUEUE_SIZE).create();// EvictingQueue.create(Parameters.QUEUE_SIZE);
         Order order;
         int[] products;
         int newOrderTurn = random.sample();
@@ -96,19 +99,13 @@ public class Model extends LearningAgent {
 
     /** Method generates new order. */
     private Order generateOrder() {
-        PoissonDistribution random = new PoissonDistribution(3);
+        Random random = new Random();
         int[] order = new int[Parameters.PRODUCT_TYPES_NO];
 
-        int reward = 0;
-        for (int i = 0; i < Parameters.PRODUCT_TYPES_NO; i++) {
-            order[i] = random.sample();
-            reward += order[i] * Parameters.COSTS.get(i + 1);
-        }
+        int reward = Parameters.REWARD != 0 ? Parameters.REWARD : random.nextInt(10);
+        int penalty = Parameters.PENALTY != 0 ? (int) (reward * Parameters.PENALTY) : random.nextInt(reward);
 
-        int penalty = random.sample();
-        penalty = penalty > 0 ? penalty : 0;
-
-        return new Order(order, random.sample() + 3, reward, penalty);
+        return new Order(order, random.nextInt(10) + 8, reward, penalty, reward);
     }
 
 }
