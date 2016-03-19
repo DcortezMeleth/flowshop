@@ -22,18 +22,13 @@ import java.util.Random;
  */
 public abstract class LearningAgent {
 
-    /** Vector of {@link weka.core.Attribute Attributes} used for learning */
-    protected final static FastVector attributes;
-
-    /** Initialization of attributes for learning process */
-    static {
-        attributes = new FastVector(1);
-        //TODO: Set attributes
-    }
+    /** Agents counter */
+    private static int counter = 0;
 
     /** learning level -> machine = -1, layer = -2, model=-3 */
     protected final int level;
 
+    /** Lower agents layer */
     protected final List<? extends LearningAgent> agents;
 
     /** Classifier name */
@@ -42,6 +37,9 @@ public abstract class LearningAgent {
     /** Train set used to teach {@link #classifier} */
     protected Instances trainSet; //TODO: initialize with attributes
 
+    /** Agent id */
+    private final int id;
+
     /** Classifier used for machine to learn */
     private Classifier classifier;
 
@@ -49,10 +47,18 @@ public abstract class LearningAgent {
         this.classifierName = classifierName;
         this.agents = agents;
         this.level = level;
+        this.id = counter++;
+    }
+
+    public int getId() {
+        return id;
     }
 
     /** Simulates one turn for agent */
     protected abstract int[] tick(final int turnNo, final int[] newTasks) throws Exception;
+
+    /** Should return attributes for agent*/
+    protected abstract FastVector getAttributes();
 
     protected List<? extends LearningAgent> getAgents() {
         return agents;
@@ -108,7 +114,7 @@ public abstract class LearningAgent {
         Instance instance = new SparseInstance(4);
         //TODO: set data into instance
 
-        Instances data = new Instances("Test", attributes, 0);
+        Instances data = new Instances("Test", getAttributes(), 0);
         data.setClassIndex(data.numAttributes() - 1);
         instance.setDataset(data);
 

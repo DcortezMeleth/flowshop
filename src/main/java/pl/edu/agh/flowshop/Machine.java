@@ -1,7 +1,6 @@
 package pl.edu.agh.flowshop;
 
 import pl.edu.agh.utils.Parameters;
-import weka.core.Instances;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -16,13 +15,16 @@ import java.util.Random;
 public class Machine extends LearningAgent {
 
     /** Type of processed product */
-    protected int productType = -1;
+    private int productType = -1;
 
     /** Type if product finished and waitning for delivery. -1 otherwise */
-    protected int finishedProduct = -1;
+    private int finishedProduct = -1;
 
     /** Turns left for product to be processed */
-    protected int turnsLeft;
+    private int turnsLeft;
+
+    /** Indicates if machine is broken */
+    private boolean broken = false;
 
     /**
      * Machine configuration in form of map: </br>
@@ -31,32 +33,21 @@ public class Machine extends LearningAgent {
      * <ul>value - processing time</ul>
      * </li>
      */
-    protected Map<Integer, Integer> timeTable;
+    private Map<Integer, Integer> timeTable;
 
     public Machine(final Map<Integer, Integer> timeTable, final String classifierName) {
         super(classifierName, new ArrayList<LearningAgent>(), Parameters.MACHINE);
         this.timeTable = timeTable;
-        this.trainSet = new Instances("TrainSet", attributes, 0);
     }
 
-    /**
-     * Checks if machine should break this turn
-     *
-     * @return product type which machine was working on, -1 if it was idle
-     */
-    private boolean isMachineBroken() {
-        if(this.turnsLeft <= 0 || this.productType < 0) {
-            return false;
-        }
-
-        //check if machine should break
-        return new Random().nextInt(100) > 5;
+    public boolean isBroken() {
+        return broken;
     }
 
     @Override
     protected int[] tick(final int trunNo, final int[] newTasks) throws Exception {
         int[] processed = new int[Parameters.PRODUCT_TYPES_NO];
-        if(isMachineBroken()) {
+        if (shouldMachineBreak()) {
             //return processed prodcut to queue
             newTasks[this.productType] += 1;
             this.productType = -1;
@@ -64,7 +55,7 @@ public class Machine extends LearningAgent {
             return processed;
         }
 
-        if(this.finishedProduct > -1) {
+        if (this.finishedProduct > -1) {
             processed[this.finishedProduct] += 1;
             this.finishedProduct = -1;
         }
@@ -81,7 +72,7 @@ public class Machine extends LearningAgent {
         }
 
         //jesli produkt skonczony to laduje w innym polu
-        if(this.productType > -1) {
+        if (this.productType > -1) {
             this.finishedProduct = this.productType;
         }
 
@@ -91,6 +82,20 @@ public class Machine extends LearningAgent {
             this.turnsLeft++;
         }
         this.productType = result;
+    }
+
+    /**
+     * Checks if machine should break this turn
+     *
+     * @return product type which machine was working on, -1 if it was idle
+     */
+    private boolean shouldMachineBreak() {
+        if (this.broken || this.turnsLeft <= 0 || this.productType < 0) {
+            return false;
+        }
+
+        //check if machine should break
+        return (this.broken = new Random().nextInt(100) > 5);
     }
 
 }

@@ -4,6 +4,8 @@ import com.google.common.collect.MinMaxPriorityQueue;
 import org.apache.commons.math3.distribution.PoissonDistribution;
 import pl.edu.agh.utils.OrderComparator;
 import pl.edu.agh.utils.Parameters;
+import weka.core.Attribute;
+import weka.core.FastVector;
 
 import java.util.List;
 import java.util.Queue;
@@ -17,11 +19,35 @@ import java.util.Random;
  */
 public class Model extends LearningAgent {
 
+    /** Vector of {@link weka.core.Attribute Attributes} used for learning */
+    private final FastVector attributes;
+
     /** Buffer of finished products waiting for delivery */
     private int[] finishedProducts = new int[Parameters.PRODUCT_TYPES_NO];
 
     public Model(final List<Layer> layers, final String classifierName) {
         super(classifierName, layers, Parameters.MODEL);
+
+        int attrNo = Parameters.PRODUCT_TYPES_NO * layers.size();
+        for(Layer layer : layers) {
+            attrNo += layer.getAgents().size();
+        }
+
+        FastVector attributes = new FastVector(attrNo);
+        final String healthPrefix = "health_";
+        final String bufferPrefix = "buffer_";
+        for(Layer layer : layers) {
+            for(int i=1; i<=Parameters.PRODUCT_TYPES_NO; i++) {
+                Attribute buffer = new Attribute(bufferPrefix + layer.getId() + "_" + i);
+                attributes.addElement(buffer);
+            }
+            for(LearningAgent agent : layer.getAgents()) {
+                Attribute health = new Attribute(healthPrefix + agent.getId());
+                attributes.addElement(health);
+            }
+        }
+
+        this.attributes = attributes;
     }
 
     /** Experiment main loop */
@@ -63,6 +89,11 @@ public class Model extends LearningAgent {
         }
 
         return products1;
+    }
+
+    @Override
+    protected FastVector getAttributes() {
+        return attributes;
     }
 
     /**
