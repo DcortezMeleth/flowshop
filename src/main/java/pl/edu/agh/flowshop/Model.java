@@ -28,15 +28,18 @@ public class Model extends LearningAgent {
     public Model(final List<Layer> layers, final String classifierName) {
         super(classifierName, layers, Parameters.MODEL);
 
+        //count number of attributes for learning
         int attrNo = Parameters.PRODUCT_TYPES_NO * layers.size();
         for(Layer layer : layers) {
             attrNo += layer.getAgents().size();
         }
 
+        // attributes initialization, for now same for all learning layers
         FastVector attributes = new FastVector(attrNo);
         final String healthPrefix = "health_";
         final String bufferPrefix = "buffer_";
         for(Layer layer : layers) {
+            layer.setAttributes(attributes);
             for(int i=1; i<=Parameters.PRODUCT_TYPES_NO; i++) {
                 Attribute buffer = new Attribute(bufferPrefix + layer.getId() + "_" + i);
                 attributes.addElement(buffer);
@@ -44,6 +47,7 @@ public class Model extends LearningAgent {
             for(LearningAgent agent : layer.getAgents()) {
                 Attribute health = new Attribute(healthPrefix + agent.getId());
                 attributes.addElement(health);
+                ((Machine)agent).setAttributes(attributes);
             }
         }
 
@@ -138,5 +142,4 @@ public class Model extends LearningAgent {
 
         return new Order(order, random.nextInt(10) + 8, reward, penalty, reward);
     }
-
 }

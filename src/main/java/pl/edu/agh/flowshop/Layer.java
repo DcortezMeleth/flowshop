@@ -1,6 +1,7 @@
 package pl.edu.agh.flowshop;
 
 import pl.edu.agh.utils.Parameters;
+import weka.core.FastVector;
 
 import java.util.List;
 
@@ -12,12 +13,24 @@ import java.util.List;
  */
 public class Layer extends LearningAgent {
 
-    /** Kolejki zadań */
+    /** Vector of {@link weka.core.Attribute Attributes} used for learning */
+    private FastVector attributes;
+
+    /** Tasks queue */
     private int[] tasksQueue;
 
     public Layer(final List<Machine> machines, final String classifierName) {
         super(classifierName, machines, Parameters.LAYER);
         this.tasksQueue = new int[Parameters.PRODUCT_TYPES_NO];
+    }
+
+    @Override
+    public FastVector getAttributes() {
+        return attributes;
+    }
+
+    public void setAttributes(final FastVector attributes) {
+        this.attributes = attributes;
     }
 
     @Override
