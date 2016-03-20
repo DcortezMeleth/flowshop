@@ -17,6 +17,7 @@ import java.io.FileReader;
 public class Experiment {
 
     public static void main(String[] args) {
+        //TODO: dodac logowanie
         ResourceFileReader reader = new ResourceFileReader();
         try {
             /*BufferedReader bufferedReader = new BufferedReader(new FileReader(reader.getResourcesFile("example.arff")));
