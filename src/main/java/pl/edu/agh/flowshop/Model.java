@@ -32,7 +32,7 @@ public class Model extends LearningAgent {
 
         //count number of attributes for learning
         int attrNo = Parameters.PRODUCT_TYPES_NO * layers.size();
-        for(Layer layer : layers) {
+        for (Layer layer : layers) {
             attrNo += layer.getAgents().size();
         }
         attrNo++;
@@ -41,16 +41,16 @@ public class Model extends LearningAgent {
         FastVector attributes = new FastVector(attrNo);
         final String healthPrefix = "health_";
         final String bufferPrefix = "buffer_";
-        for(Layer layer : layers) {
+        for (Layer layer : layers) {
             layer.setAttributes(attributes);
-            for(int i=1; i<=Parameters.PRODUCT_TYPES_NO; i++) {
+            for (int i = 1; i <= Parameters.PRODUCT_TYPES_NO; i++) {
                 Attribute buffer = new Attribute(bufferPrefix + layer.getId() + "_" + i);
                 attributes.addElement(buffer);
             }
-            for(LearningAgent agent : layer.getAgents()) {
+            for (LearningAgent agent : layer.getAgents()) {
                 Attribute health = new Attribute(healthPrefix + agent.getId());
                 attributes.addElement(health);
-                ((Machine)agent).setAttributes(attributes);
+                ((Machine) agent).setAttributes(attributes);
             }
         }
 
@@ -66,13 +66,18 @@ public class Model extends LearningAgent {
     public void run() throws Exception {
         PoissonDistribution random = new PoissonDistribution(3);
         Queue<Order> orders =
-                MinMaxPriorityQueue.orderedBy(new OrderComparator()).maximumSize(Parameters.QUEUE_SIZE).create();// EvictingQueue.create(Parameters.QUEUE_SIZE);
+                MinMaxPriorityQueue.orderedBy(new OrderComparator()).maximumSize(Parameters.QUEUE_SIZE).create();//
+        // EvictingQueue.create(Parameters.QUEUE_SIZE);
         Order order;
         int[] products;
         int newOrderTurn = random.sample();
 
         //main loop
         for (int turnNo = 0; turnNo < Parameters.TURN_LIMIT; turnNo++) {
+            //train on collected data
+            if (turnNo % Parameters.LEARNING_TURN == 0) {
+                train();
+            }
 
             //generate new order
             if (turnNo == newOrderTurn) {
@@ -90,7 +95,7 @@ public class Model extends LearningAgent {
             //remove finished orders
             deliverOrders(orders, finishedProducts);
 
-            for(Order order1 : orders) {
+            for (Order order1 : orders) {
                 order1.decreaseDueTime();
             }
         }
@@ -110,6 +115,39 @@ public class Model extends LearningAgent {
     @Override
     protected FastVector getAttributes() {
         return attributes;
+    }
+
+    /** Prepares entry for decision */
+    protected Instance prepareInstanceForDecision() {
+        Instance instance = new SparseInstance(getAttributes().size() - 1);
+
+        setAttributesValues(instance);
+
+        return instance;
+    }
+
+    /** Prepares one entry in train set */
+    private Instance prepareTrainData(final int reward) {
+        Instance instance = new SparseInstance(getAttributes().size());
+
+        setAttributesValues(instance);
+
+        instance.setValue(getAttributes().size() - 1, reward > Parameters.DECISION_THRESHOLD ? "GOOD" : "BAD");
+        return instance;
+    }
+
+    /** Set attributes values in given instance */
+    private void setAttributesValues(final Instance instance) {
+        int attrIdx = 0;
+        for (LearningAgent agent : getAgents()) {
+            Layer layer = (Layer) agent;
+            for (int i = 1; i <= Parameters.PRODUCT_TYPES_NO; i++) {
+                instance.setValue(attrIdx++, layer.getQuantityInBuffer(i));
+            }
+            for (LearningAgent agent1 : layer.getAgents()) {
+                instance.setValue(attrIdx++, ((Machine) agent1).isBroken() ? 0 : 1);
+            }
+        }
     }
 
     /**
@@ -136,37 +174,16 @@ public class Model extends LearningAgent {
             orders.poll();
 
             train();
-            addTrainData(prepareTrainData());
 
             reward += order.getReward() + order.getValue();
-            if(order.getDueTime() > 0) {
+            if (order.getDueTime() > 0) {
                 reward -= order.getPenalty();
             }
+
+            addTrainData(prepareTrainData(reward));
         }
 
         return reward;
-    }
-
-    /** Prepares one entry in train set */
-    private Instance prepareTrainData() {
-        Instance instance = new SparseInstance(getAttributes().size());
-
-        int attrIdx = 0;
-        for(LearningAgent agent : getAgents()) {
-            Layer layer = (Layer) agent;
-            for(int i=1; i<=Parameters.PRODUCT_TYPES_NO; i++) {
-                instance.setValue(attrIdx++, layer.getQuantityInBuffer(i));
-            }
-            for(LearningAgent agent1 : layer.getAgents()) {
-                instance.setValue(attrIdx++, ((Machine)agent1).isBroken() ? 0 : 1);
-            }
-        }
-
-        FastVector result = new FastVector(2);
-        result.addElement("GOOD");
-        result.addElement("BAD");
-        attributes.addElement(new Attribute("result", result));
-        return null;
     }
 
     /** Method generates new order. */

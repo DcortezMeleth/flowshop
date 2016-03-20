@@ -37,6 +37,9 @@ public abstract class Parameters {
      */
     public static final int LEARNING_LEVEL;
 
+    /** Threshold for decision between good and bad labels */
+    public static final int DECISION_THRESHOLD;
+
     /** Layer level of learning. */
     public static final int MACHINE = -1;
 
@@ -67,14 +70,17 @@ public abstract class Parameters {
     /** Key for learning layer in properties file. */
     private static final String LEARNING_LEVEL_KEY = "LEARNING_LEVEL";
 
-    /** File with experiment configuration */
-    private static final String PROPERTIES_FILE_KEY = "flowshop.properties";
-
     /** Reward for completion od order */
     private static final String REWARD_KEY = "REWARD";
 
     /** Penalty for not completing order in time */
     private static final String PENALTY_KEY = "PENALTY";
+
+    /** Threshold for decision between good and bad labels */
+    private static final String DECISION_THRESHOLD_KEY = "DECISION_THRESHOLD";
+
+    /** File with experiment configuration */
+    private static final String PROPERTIES_FILE_KEY = "flowshop.properties";
 
     static {
         Properties configuration = new Properties();
@@ -86,6 +92,7 @@ public abstract class Parameters {
         PRODUCT_TYPES_NO = Integer.parseInt(configuration.getProperty(PRODUCT_TYPES_NO_KEY));
         LEARNING_LEVEL = Integer.parseInt(configuration.getProperty(LEARNING_LEVEL_KEY));
         REWARD = Integer.parseInt(configuration.getProperty(REWARD_KEY));
+        DECISION_THRESHOLD = Integer.parseInt(configuration.getProperty(DECISION_THRESHOLD_KEY));
         PENALTY = Double.parseDouble(configuration.getProperty(PENALTY_KEY));
 
         COSTS = new HashMap<>();

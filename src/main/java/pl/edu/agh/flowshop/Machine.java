@@ -2,6 +2,7 @@ package pl.edu.agh.flowshop;
 
 import pl.edu.agh.utils.Parameters;
 import weka.core.FastVector;
+import weka.core.Instance;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -20,9 +21,6 @@ public class Machine extends LearningAgent {
 
     /** Type of processed product */
     private int productType = -1;
-
-    /** Type if product finished and waitning for delivery. -1 otherwise */
-    private int finishedProduct = -1;
 
     /** Turns left for product to be processed */
     private int turnsLeft;
@@ -58,39 +56,41 @@ public class Machine extends LearningAgent {
     }
 
     @Override
-    protected int[] tick(final int trunNo, final int[] newTasks) throws Exception {
+    protected int[] tick(final int turnNo, final int[] newTasks) throws Exception {
         int[] processed = new int[Parameters.PRODUCT_TYPES_NO];
         if (shouldMachineBreak()) {
-            //return processed prodcut to queue
+            //return processed product to queue
             newTasks[this.productType] += 1;
             this.productType = -1;
             this.turnsLeft = 1;
             return processed;
         }
 
-        if (this.finishedProduct > -1) {
-            processed[this.finishedProduct] += 1;
-            this.finishedProduct = -1;
+        //take task from queue
+        if (this.turnsLeft <= 0) {
+            newTasks[this.productType] -= 1;
+            this.turnsLeft = this.timeTable.get(this.productType);
         }
 
         this.turnsLeft--;
+
+        //finished product is moved to finishedProduct field
+        if (this.turnsLeft <= 0 && this.productType > -1) {
+            processed[this.productType] += 1;
+        }
+
         return processed;
     }
 
     @Override
-    protected void decideOnAction(final int action) throws Exception {
-        //zmienic typ mozemy tylko gdy aktualnie czegos nie przetwarzamy
+    protected void decideOnAction(final int action, final Instance instance) throws Exception {
+        //changing production type while working is forbidden
         if (this.turnsLeft > 0) {
             return;
         }
 
-        //jesli produkt skonczony to laduje w innym polu
-        if (this.productType > -1) {
-            this.finishedProduct = this.productType;
-        }
-
-        //sprawdzamy czy generujamy akcje czy wygenerowano ja wyzej
-        int result = action >= 0 ? action : getAction();
+        //we check whether we should generate choice or its generated above
+        int result = action >= 0 ? action : getAction(instance);
         if (result != this.productType) {
             this.turnsLeft++;
         }

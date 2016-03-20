@@ -27,7 +27,6 @@ public class ConfigReader {
 
     /** Creates model based on config files */
     public static Model createModel() {
-
         List<List<Machine>> machinesConf = getMachinesConfig();
 
         List<Layer> layers = new ArrayList<>();
@@ -35,7 +34,11 @@ public class ConfigReader {
             layers.add(new Layer(machines, ""));
         }
 
-        return new Model(layers, "");
+        Model result = new Model(layers, "");
+        for (Layer layer : layers) {
+            layer.setModel(result);
+        }
+        return result;
     }
 
     /** Reads machines configuration from file */

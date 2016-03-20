@@ -19,6 +19,9 @@ public class Layer extends LearningAgent {
     /** Tasks queue */
     private int[] tasksQueue;
 
+    /** Model to whom layer belongs */
+    private Model model;
+
     public Layer(final List<Machine> machines, final String classifierName) {
         super(classifierName, machines, Parameters.LAYER);
         this.tasksQueue = new int[Parameters.PRODUCT_TYPES_NO];
@@ -33,6 +36,10 @@ public class Layer extends LearningAgent {
         this.attributes = attributes;
     }
 
+    public void setModel(final Model model) {
+        this.model = model;
+    }
+
     /** Returns quantity of product type in buffer */
     public int getQuantityInBuffer(final int productType) {
         return this.tasksQueue[productType];
@@ -43,13 +50,8 @@ public class Layer extends LearningAgent {
         //add new tasks to queue
         addProducts(this.tasksQueue, newTasks);
 
-        //train on collected data
-        if (turnNo % Parameters.LEARNING_TURN == 0) {
-            train();
-        }
-
         //chance for changing processing product type
-        decideOnAction(Parameters.LEARNING_LEVEL);
+        model.decideOnAction(Parameters.LEARNING_LEVEL, model.prepareInstanceForDecision());
 
         //tick for machines
         int[] finishedProducts = new int[Parameters.PRODUCT_TYPES_NO];

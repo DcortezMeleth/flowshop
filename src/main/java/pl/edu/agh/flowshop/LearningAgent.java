@@ -9,7 +9,6 @@ import weka.classifiers.trees.J48;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.SparseInstance;
 
 import java.util.List;
 import java.util.Random;
@@ -31,14 +30,14 @@ public abstract class LearningAgent {
     /** Lower agents layer */
     protected final List<? extends LearningAgent> agents;
 
+    /** Agent id */
+    private final int id;
+
     /** Classifier name */
     protected String classifierName = "";
 
     /** Train set used to teach {@link #classifier} */
-    protected Instances trainSet; //TODO: initialize with attributes
-
-    /** Agent id */
-    private final int id;
+    protected Instances trainSet;
 
     /** Classifier used for machine to learn */
     private Classifier classifier;
@@ -57,7 +56,7 @@ public abstract class LearningAgent {
     /** Simulates one turn for agent */
     protected abstract int[] tick(final int turnNo, final int[] newTasks) throws Exception;
 
-    /** Should return attributes for agent*/
+    /** Should return attributes for agent */
     protected abstract FastVector getAttributes();
 
     protected List<? extends LearningAgent> getAgents() {
@@ -67,12 +66,13 @@ public abstract class LearningAgent {
     /**
      * Classifies given example based on {@link #classifier} decision.
      *
-     * @param action choosen action, -1 if machine should choose itself
+     * @param action   chosen action, -1 if machine should choose itself
+     * @param instance instance to decide on
      * @throws Exception
      */
-    protected void decideOnAction(int action) throws Exception {
+    protected void decideOnAction(final int action, final Instance instance) throws Exception {
         for (LearningAgent agent : this.agents) {
-            agent.decideOnAction(getAction());
+            agent.decideOnAction(getAction(instance), instance);
         }
     }
 
@@ -86,7 +86,7 @@ public abstract class LearningAgent {
 
     /** Adds sample to {@link #trainSet} dataset of this agent and all underlying. */
     protected void addTrainData(final Instance instance) {
-        if(this.trainSet == null) {
+        if (this.trainSet == null) {
             this.trainSet = new Instances("TrainSet", getAttributes(), 0);
             this.trainSet.setClassIndex(this.trainSet.numAttributes() - 1);
         }
@@ -108,15 +108,12 @@ public abstract class LearningAgent {
     }
 
     /** Return number of product which should be worked on */
-    protected int getAction() throws Exception {
+    protected int getAction(final Instance instance) throws Exception {
         if (this.level != Parameters.LEARNING_LEVEL) {
             return this.level;
         }
 
-        Instance instance = new SparseInstance(4);
-        //TODO: set data into instance
-
-        Instances data = new Instances("Test", getAttributes(), 0);
+        Instances data = new Instances("Decide", getAttributes(), 0);
         data.setClassIndex(data.numAttributes() - 1);
         instance.setDataset(data);
 
@@ -155,14 +152,14 @@ public abstract class LearningAgent {
         Random random = new Random();
 
         //eksploracja
-        if(random.nextInt(100) < 5) {
+        if (random.nextInt(100) < 5) {
             return random.nextInt(Parameters.PRODUCT_TYPES_NO);
         }
 
         int result = 0;
         double highest = propabilities[0];
-        for(int i=1; i<Parameters.PRODUCT_TYPES_NO; i++) {
-            if(propabilities[i] > highest) {
+        for (int i = 1; i < Parameters.PRODUCT_TYPES_NO; i++) {
+            if (propabilities[i] > highest) {
                 result = i;
                 highest = propabilities[i];
             }
