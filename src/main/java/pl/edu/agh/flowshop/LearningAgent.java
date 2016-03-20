@@ -84,15 +84,17 @@ public abstract class LearningAgent {
         }
     }
 
-    /** Adds sample to {@link #trainSet} dataset. */
-    protected void addTrainData() {
-        Instance instance = new SparseInstance(4);
-        //TODO: set data into instance
+    /** Adds sample to {@link #trainSet} dataset of this agent and all underlying. */
+    protected void addTrainData(final Instance instance) {
+        if(this.trainSet == null) {
+            this.trainSet = new Instances("TrainSet", getAttributes(), 0);
+            this.trainSet.setClassIndex(this.trainSet.numAttributes() - 1);
+        }
 
         this.trainSet.add(instance);
 
         for (LearningAgent agent : getAgents()) {
-            agent.addTrainData();
+            agent.addTrainData(instance);
         }
     }
 

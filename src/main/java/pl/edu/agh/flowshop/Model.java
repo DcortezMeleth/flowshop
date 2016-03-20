@@ -6,6 +6,8 @@ import pl.edu.agh.utils.OrderComparator;
 import pl.edu.agh.utils.Parameters;
 import weka.core.Attribute;
 import weka.core.FastVector;
+import weka.core.Instance;
+import weka.core.SparseInstance;
 
 import java.util.List;
 import java.util.Queue;
@@ -33,6 +35,7 @@ public class Model extends LearningAgent {
         for(Layer layer : layers) {
             attrNo += layer.getAgents().size();
         }
+        attrNo++;
 
         // attributes initialization, for now same for all learning layers
         FastVector attributes = new FastVector(attrNo);
@@ -50,6 +53,11 @@ public class Model extends LearningAgent {
                 ((Machine)agent).setAttributes(attributes);
             }
         }
+
+        FastVector result = new FastVector(2);
+        result.addElement("GOOD");
+        result.addElement("BAD");
+        attributes.addElement(new Attribute("result", result));
 
         this.attributes = attributes;
     }
@@ -81,6 +89,10 @@ public class Model extends LearningAgent {
 
             //remove finished orders
             deliverOrders(orders, finishedProducts);
+
+            for(Order order1 : orders) {
+                order1.decreaseDueTime();
+            }
         }
     }
 
@@ -124,12 +136,37 @@ public class Model extends LearningAgent {
             orders.poll();
 
             train();
-            addTrainData();
+            addTrainData(prepareTrainData());
 
-            reward += order.getReward();
+            reward += order.getReward() + order.getValue();
+            if(order.getDueTime() > 0) {
+                reward -= order.getPenalty();
+            }
         }
 
         return reward;
+    }
+
+    /** Prepares one entry in train set */
+    private Instance prepareTrainData() {
+        Instance instance = new SparseInstance(getAttributes().size());
+
+        int attrIdx = 0;
+        for(LearningAgent agent : getAgents()) {
+            Layer layer = (Layer) agent;
+            for(int i=1; i<=Parameters.PRODUCT_TYPES_NO; i++) {
+                instance.setValue(attrIdx++, layer.getQuantityInBuffer(i));
+            }
+            for(LearningAgent agent1 : layer.getAgents()) {
+                instance.setValue(attrIdx++, ((Machine)agent1).isBroken() ? 0 : 1);
+            }
+        }
+
+        FastVector result = new FastVector(2);
+        result.addElement("GOOD");
+        result.addElement("BAD");
+        attributes.addElement(new Attribute("result", result));
+        return null;
     }
 
     /** Method generates new order. */

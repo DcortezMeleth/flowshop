@@ -33,6 +33,11 @@ public class Layer extends LearningAgent {
         this.attributes = attributes;
     }
 
+    /** Returns quantity of product type in buffer */
+    public int getQuantityInBuffer(final int productType) {
+        return this.tasksQueue[productType];
+    }
+
     @Override
     public int[] tick(final int turnNo, final int[] newTasks) throws Exception {
         //add new tasks to queue

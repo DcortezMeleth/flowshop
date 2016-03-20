@@ -2,8 +2,6 @@ package pl.edu.agh.flowshop;
 
 import pl.edu.agh.utils.Parameters;
 
-import java.util.Comparator;
-
 /**
  * Order class.
  *
@@ -15,9 +13,6 @@ public class Order {
     /** Product list */
     private final int[] productsList;
 
-    /** Due time for completion */
-    private final int dueTime;
-
     /** Reward for completion */
     private final int reward;
 
@@ -26,6 +21,9 @@ public class Order {
 
     /** Order priority */
     private final int priority;
+
+    /** Due time for completion */
+    private int dueTime;
 
     public Order(final int[] productsList, final int dueTime, final int reward, final int penalty, final int priority) {
         this.productsList = productsList;
@@ -42,6 +40,10 @@ public class Order {
             result += productsList[i] * Parameters.COSTS.get(i + 1);
         }
         return result;
+    }
+
+    public void decreaseDueTime() {
+        this.dueTime--;
     }
 
     public int[] getProductsList() {
