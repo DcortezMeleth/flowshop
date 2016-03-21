@@ -75,7 +75,7 @@ public class Model extends LearningAgent {
         //main loop
         for (int turnNo = 0; turnNo < Parameters.TURN_LIMIT; turnNo++) {
             //train on collected data
-            if (turnNo % Parameters.LEARNING_TURN == 0) {
+            if (turnNo % Parameters.LEARNING_TURN == 0 && turnNo != 0) {
                 train();
             }
 
@@ -132,7 +132,7 @@ public class Model extends LearningAgent {
 
         setAttributesValues(instance);
 
-        instance.setValue(getAttributes().size() - 1, reward > Parameters.DECISION_THRESHOLD ? "GOOD" : "BAD");
+        instance.setValue((Attribute) getAttributes().lastElement(), reward > Parameters.DECISION_THRESHOLD ? "GOOD" : "BAD");
         return instance;
     }
 
@@ -141,7 +141,7 @@ public class Model extends LearningAgent {
         int attrIdx = 0;
         for (LearningAgent agent : getAgents()) {
             Layer layer = (Layer) agent;
-            for (int i = 1; i <= Parameters.PRODUCT_TYPES_NO; i++) {
+            for (int i = 0; i < Parameters.PRODUCT_TYPES_NO; i++) {
                 instance.setValue(attrIdx++, layer.getQuantityInBuffer(i));
             }
             for (LearningAgent agent1 : layer.getAgents()) {
@@ -173,14 +173,14 @@ public class Model extends LearningAgent {
             }
             orders.poll();
 
-            train();
-
             reward += order.getReward() + order.getValue();
             if (order.getDueTime() > 0) {
                 reward -= order.getPenalty();
             }
 
             addTrainData(prepareTrainData(reward));
+
+            train();
         }
 
         return reward;

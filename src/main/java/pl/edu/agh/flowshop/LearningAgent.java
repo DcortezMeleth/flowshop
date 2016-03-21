@@ -10,6 +10,7 @@ import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -28,7 +29,7 @@ public abstract class LearningAgent {
     protected final int level;
 
     /** Lower agents layer */
-    protected final List<? extends LearningAgent> agents;
+    protected List<? extends LearningAgent> agents;
 
     /** Agent id */
     private final int id;
@@ -50,7 +51,7 @@ public abstract class LearningAgent {
     }
 
     public int getId() {
-        return id;
+        return this.id;
     }
 
     /** Simulates one turn for agent */
@@ -60,7 +61,10 @@ public abstract class LearningAgent {
     protected abstract FastVector getAttributes();
 
     protected List<? extends LearningAgent> getAgents() {
-        return agents;
+        if(this.agents == null) {
+            this.agents = new ArrayList<>();
+        }
+        return this.agents;
     }
 
     /**
@@ -100,11 +104,11 @@ public abstract class LearningAgent {
 
     /** Returns classifier */
     protected Classifier getClassifier() {
-        if (classifier == null) {
+        if (this.classifier == null) {
             assignClassifier();
         }
 
-        return classifier;
+        return this.classifier;
     }
 
     /** Return number of product which should be worked on */

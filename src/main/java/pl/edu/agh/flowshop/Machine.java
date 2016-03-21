@@ -69,7 +69,7 @@ public class Machine extends LearningAgent {
         //take task from queue
         if (this.turnsLeft <= 0) {
             newTasks[this.productType] -= 1;
-            this.turnsLeft = this.timeTable.get(this.productType);
+            this.turnsLeft = this.timeTable.get(this.productType + 1);
         }
 
         this.turnsLeft--;
