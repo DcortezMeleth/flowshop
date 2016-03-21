@@ -2,13 +2,6 @@ package pl.edu.agh;
 
 import pl.edu.agh.flowshop.Model;
 import pl.edu.agh.utils.ConfigReader;
-import pl.edu.agh.utils.Parameters;
-import pl.edu.agh.utils.ResourceFileReader;
-import weka.classifiers.bayes.NaiveBayes;
-import weka.core.*;
-
-import java.io.BufferedReader;
-import java.io.FileReader;
 
 /**
  * @author Bartosz

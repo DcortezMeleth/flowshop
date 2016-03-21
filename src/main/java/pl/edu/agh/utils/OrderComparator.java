@@ -14,7 +14,7 @@ public class OrderComparator implements Comparator<Order> {
 
     @Override
     public int compare(final Order o1, final Order o2) {
-            /* Sorting from least to greatest, for priority queue to work right */
+        /* Sorting from least to greatest, for priority queue to work right */
         return o2.getPriority() - o1.getPriority();
     }
 }
