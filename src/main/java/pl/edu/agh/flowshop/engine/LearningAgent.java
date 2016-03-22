@@ -1,6 +1,6 @@
-package pl.edu.agh.flowshop;
+package pl.edu.agh.flowshop.engine;
 
-import pl.edu.agh.utils.Parameters;
+import pl.edu.agh.flowshop.utils.Parameters;
 import weka.classifiers.Classifier;
 import weka.classifiers.bayes.BayesNet;
 import weka.classifiers.bayes.NaiveBayes;
@@ -22,17 +22,20 @@ import java.util.Random;
  */
 public abstract class LearningAgent {
 
+    /** Vector of {@link weka.core.Attribute Attributes} used for learning */
+    private FastVector attributes;
+
     /** Agents counter */
     private static int counter = 0;
 
     /** learning level -> machine = -1, layer = -2, model=-3 */
     protected final int level;
 
-    /** Lower agents layer */
-    protected List<? extends LearningAgent> agents;
-
     /** Agent id */
     private final int id;
+
+    /** Lower agents layer */
+    protected List<? extends LearningAgent> agents;
 
     /** Classifier name */
     protected String classifierName = "";
@@ -54,17 +57,22 @@ public abstract class LearningAgent {
         return this.id;
     }
 
-    /** Simulates one turn for agent */
-    protected abstract int[] tick(final int turnNo, final int[] newTasks) throws Exception;
-
-    /** Should return attributes for agent */
-    protected abstract FastVector getAttributes();
-
-    protected List<? extends LearningAgent> getAgents() {
-        if(this.agents == null) {
+    public List<? extends LearningAgent> getAgents() {
+        if (this.agents == null) {
             this.agents = new ArrayList<>();
         }
         return this.agents;
+    }
+
+    /** Simulates one turn for agent */
+    protected abstract int[] tick(final int turnNo, final int[] newTasks) throws Exception;
+
+    public FastVector getAttributes() {
+        return attributes;
+    }
+
+    public void setAttributes(final FastVector attributes) {
+        this.attributes = attributes;
     }
 
     /**

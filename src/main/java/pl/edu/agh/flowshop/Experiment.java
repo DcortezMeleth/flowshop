@@ -1,7 +1,7 @@
-package pl.edu.agh;
+package pl.edu.agh.flowshop;
 
-import pl.edu.agh.flowshop.Model;
-import pl.edu.agh.utils.ConfigReader;
+import pl.edu.agh.flowshop.engine.Model;
+import pl.edu.agh.flowshop.utils.ConfigReader;
 
 /**
  * @author Bartosz

@@ -1,14 +1,17 @@
-package pl.edu.agh.flowshop;
+package pl.edu.agh.flowshop.engine;
 
+import com.google.common.collect.EvictingQueue;
 import com.google.common.collect.MinMaxPriorityQueue;
 import org.apache.commons.math3.distribution.PoissonDistribution;
-import pl.edu.agh.utils.OrderComparator;
-import pl.edu.agh.utils.Parameters;
+import pl.edu.agh.flowshop.entity.Order;
+import pl.edu.agh.flowshop.utils.AttributesInitializer;
+import pl.edu.agh.flowshop.utils.OrderComparator;
+import pl.edu.agh.flowshop.utils.Parameters;
 import weka.core.Attribute;
-import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.SparseInstance;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
 import java.util.Random;
@@ -21,45 +24,18 @@ import java.util.Random;
  */
 public class Model extends LearningAgent {
 
-    /** Vector of {@link weka.core.Attribute Attributes} used for learning */
-    private final FastVector attributes;
+    /** Model history used for learning */
+    private final ModelHistory history;
 
     /** Buffer of finished products waiting for delivery */
     private int[] finishedProducts = new int[Parameters.PRODUCT_TYPES_NO];
 
     public Model(final List<Layer> layers, final String classifierName) {
         super(classifierName, layers, Parameters.MODEL);
+        this.history = new ModelHistory();
 
-        //count number of attributes for learning
-        int attrNo = Parameters.PRODUCT_TYPES_NO * layers.size();
-        for (Layer layer : layers) {
-            attrNo += layer.getAgents().size();
-        }
-        attrNo++;
-
-        // attributes initialization, for now same for all learning layers
-        FastVector attributes = new FastVector(attrNo);
-        final String healthPrefix = "health_";
-        final String bufferPrefix = "buffer_";
-        for (Layer layer : layers) {
-            layer.setAttributes(attributes);
-            for (int i = 1; i <= Parameters.PRODUCT_TYPES_NO; i++) {
-                Attribute buffer = new Attribute(bufferPrefix + layer.getId() + "_" + i);
-                attributes.addElement(buffer);
-            }
-            for (LearningAgent agent : layer.getAgents()) {
-                Attribute health = new Attribute(healthPrefix + agent.getId());
-                attributes.addElement(health);
-                ((Machine) agent).setAttributes(attributes);
-            }
-        }
-
-        FastVector result = new FastVector(2);
-        result.addElement("GOOD");
-        result.addElement("BAD");
-        attributes.addElement(new Attribute("result", result));
-
-        this.attributes = attributes;
+        /** Init attributes */
+        AttributesInitializer.initAttributes(this);
     }
 
     /** Experiment main loop */
@@ -112,27 +88,12 @@ public class Model extends LearningAgent {
         return products1;
     }
 
-    @Override
-    protected FastVector getAttributes() {
-        return attributes;
-    }
-
     /** Prepares entry for decision */
     protected Instance prepareInstanceForDecision() {
         Instance instance = new SparseInstance(getAttributes().size() - 1);
 
         setAttributesValues(instance);
 
-        return instance;
-    }
-
-    /** Prepares one entry in train set */
-    private Instance prepareTrainData(final int reward) {
-        Instance instance = new SparseInstance(getAttributes().size());
-
-        setAttributesValues(instance);
-
-        instance.setValue((Attribute) getAttributes().lastElement(), reward > Parameters.DECISION_THRESHOLD ? "GOOD" : "BAD");
         return instance;
     }
 
@@ -178,7 +139,8 @@ public class Model extends LearningAgent {
                 reward -= order.getPenalty();
             }
 
-            addTrainData(prepareTrainData(reward));
+            this.history.addEntry(getAgents());
+            addTrainData(this.history.getTrainingExample(reward));
 
             train();
         }
@@ -195,5 +157,43 @@ public class Model extends LearningAgent {
         int penalty = Parameters.PENALTY != 0 ? (int) (reward * Parameters.PENALTY) : random.nextInt(reward);
 
         return new Order(order, random.nextInt(10) + 8, reward, penalty, reward);
+    }
+
+    /**
+     * Data instance used for holding model history.
+     */
+    private class ModelHistory {
+
+        private Queue<List<Integer>> entries = EvictingQueue.create(Parameters.USED_HISTORY);
+
+        /** Adds entry to {@link #entries} set */
+        public void addEntry(final List<? extends LearningAgent> agents) {
+            List<Integer> entry = new ArrayList<>();
+            for (LearningAgent agent : agents) {
+                Layer layer = (Layer) agent;
+                for (int i = 0; i < Parameters.PRODUCT_TYPES_NO; i++) {
+                    entry.add(layer.getQuantityInBuffer(i));
+                }
+                for (LearningAgent agent1 : layer.getAgents()) {
+                    entry.add(((Machine) agent1).isBroken() ? 0 : 1);
+                }
+            }
+            this.entries.add(entry);
+        }
+
+        /** Creates instance of training data based on model history */
+        public Instance getTrainingExample(final int reward) {
+            Instance instance = new SparseInstance(getAttributes().size());
+
+            int attrIdx = 0;
+            for (List<Integer> entry : this.entries) {
+                for (Integer val : entry) {
+                    instance.setValue(attrIdx, val);
+                }
+            }
+            instance.setValue((Attribute) getAttributes().lastElement(), reward > Parameters.DECISION_THRESHOLD ? "GOOD" : "BAD");
+
+            return instance;
+        }
     }
 }

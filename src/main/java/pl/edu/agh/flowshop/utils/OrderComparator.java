@@ -1,6 +1,6 @@
-package pl.edu.agh.utils;
+package pl.edu.agh.flowshop.utils;
 
-import pl.edu.agh.flowshop.Order;
+import pl.edu.agh.flowshop.entity.Order;
 
 import java.util.Comparator;
 

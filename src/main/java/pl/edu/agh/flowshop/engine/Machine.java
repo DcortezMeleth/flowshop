@@ -1,7 +1,6 @@
-package pl.edu.agh.flowshop;
+package pl.edu.agh.flowshop.engine;
 
-import pl.edu.agh.utils.Parameters;
-import weka.core.FastVector;
+import pl.edu.agh.flowshop.utils.Parameters;
 import weka.core.Instance;
 
 import java.util.ArrayList;
@@ -15,9 +14,6 @@ import java.util.Random;
  *         Created on 02.02.2016.
  */
 public class Machine extends LearningAgent {
-
-    /** Vector of {@link weka.core.Attribute Attributes} used for learning */
-    private FastVector attributes;
 
     /** Type of processed product */
     private int productType = -1;
@@ -40,15 +36,6 @@ public class Machine extends LearningAgent {
     public Machine(final Map<Integer, Integer> timeTable, final String classifierName) {
         super(classifierName, new ArrayList<LearningAgent>(), Parameters.MACHINE);
         this.timeTable = timeTable;
-    }
-
-    @Override
-    public FastVector getAttributes() {
-        return attributes;
-    }
-
-    public void setAttributes(final FastVector attributes) {
-        this.attributes = attributes;
     }
 
     public boolean isBroken() {

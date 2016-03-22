@@ -1,4 +1,4 @@
-package pl.edu.agh.utils;
+package pl.edu.agh.flowshop.utils;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -40,6 +40,9 @@ public abstract class Parameters {
     /** Threshold for decision between good and bad labels */
     public static final int DECISION_THRESHOLD;
 
+    /** Lenght of history entries used for learning */
+    public static final int USED_HISTORY;
+
     /** Layer level of learning. */
     public static final int MACHINE = -1;
 
@@ -79,6 +82,9 @@ public abstract class Parameters {
     /** Threshold for decision between good and bad labels */
     private static final String DECISION_THRESHOLD_KEY = "DECISION_THRESHOLD";
 
+    /** Lenght of history entries used for learning */
+    private static final String USED_HISTORY_KEY = "USED_HISTORY";
+
     /** File with experiment configuration */
     private static final String PROPERTIES_FILE_KEY = "flowshop.properties";
 
@@ -94,6 +100,7 @@ public abstract class Parameters {
         REWARD = Integer.parseInt(configuration.getProperty(REWARD_KEY));
         DECISION_THRESHOLD = Integer.parseInt(configuration.getProperty(DECISION_THRESHOLD_KEY));
         PENALTY = Double.parseDouble(configuration.getProperty(PENALTY_KEY));
+        USED_HISTORY = Integer.parseInt(configuration.getProperty(USED_HISTORY_KEY));
 
         COSTS = new HashMap<>();
         for (int i = 1; i <= PRODUCT_TYPES_NO; i++) {

@@ -1,6 +1,6 @@
-package pl.edu.agh.flowshop;
+package pl.edu.agh.flowshop.entity;
 
-import pl.edu.agh.utils.Parameters;
+import pl.edu.agh.flowshop.utils.Parameters;
 
 /**
  * Order class.

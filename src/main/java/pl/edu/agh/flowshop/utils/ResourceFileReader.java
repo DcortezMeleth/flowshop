@@ -1,4 +1,4 @@
-package pl.edu.agh.utils;
+package pl.edu.agh.flowshop.utils;
 
 import org.apache.commons.io.IOUtils;
 

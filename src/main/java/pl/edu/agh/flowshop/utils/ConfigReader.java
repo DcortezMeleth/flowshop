@@ -1,11 +1,11 @@
-package pl.edu.agh.utils;
+package pl.edu.agh.flowshop.utils;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
-import pl.edu.agh.flowshop.Layer;
-import pl.edu.agh.flowshop.Machine;
-import pl.edu.agh.flowshop.Model;
+import pl.edu.agh.flowshop.engine.Layer;
+import pl.edu.agh.flowshop.engine.Machine;
+import pl.edu.agh.flowshop.engine.Model;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
