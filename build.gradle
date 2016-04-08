@@ -11,6 +11,9 @@ mainClassName = 'pl.edu.agh.flowshop.Experiment'
 
 repositories {
     mavenCentral()
+    flatDir {
+        dirs 'libs'
+    }
 }
 
 dependencies {
@@ -22,6 +25,7 @@ dependencies {
     compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.5'
     compile group: 'com.google.guava', name: 'guava', version: '19.0'
     compile group: 'com.google.code.gson', name: 'gson', version: '2.6.2'
+    compile name:'piqle'
 }
 
 jar {

@@ -2,6 +2,10 @@ package pl.edu.agh.flowshop.engine;
 
 import com.google.common.collect.EvictingQueue;
 import com.google.common.collect.MinMaxPriorityQueue;
+import environment.ActionList;
+import environment.IAction;
+import environment.IEnvironment;
+import environment.IState;
 import org.apache.commons.math3.distribution.PoissonDistribution;
 import pl.edu.agh.flowshop.entity.Order;
 import pl.edu.agh.flowshop.utils.AttributesInitializer;
@@ -22,7 +26,7 @@ import java.util.Random;
  * @author Bartosz Sądel
  *         Created on 11.03.2016.
  */
-public class Model extends LearningAgent {
+public class Model extends LearningAgent implements IEnvironment {
 
     /** Model history used for learning */
     private final ModelHistory history;
@@ -75,6 +79,31 @@ public class Model extends LearningAgent {
                 order1.decreaseDueTime();
             }
         }
+    }
+
+    @Override
+    public ActionList getActionList(final IState iState) {
+        return null;
+    }
+
+    @Override
+    public IState successorState(final IState iState, final IAction iAction) {
+        return null;
+    }
+
+    @Override
+    public double getReward(final IState iState, final IState iState1, final IAction iAction) {
+        return 0;
+    }
+
+    @Override
+    public boolean isFinal(final IState iState) {
+        return false;
+    }
+
+    @Override
+    public int whoWins(final IState iState) {
+        return 0;
     }
 
     @Override
