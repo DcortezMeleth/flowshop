@@ -117,4 +117,7 @@ public abstract class Parameters {
         }
     }
 
+    private Parameters() {
+    }
+
 }

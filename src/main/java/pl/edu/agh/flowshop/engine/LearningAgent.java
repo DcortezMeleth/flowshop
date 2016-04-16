@@ -130,7 +130,7 @@ public abstract class LearningAgent {
         instance.setDataset(data);
 
         double[] probabilities = getClassifier().distributionForInstance(instance);
-        return chooseActionFromPropabilities(probabilities);
+        return chooseActionFromProbabilities(probabilities);
     }
 
     /** Adds products from list2 to list1 */
@@ -159,21 +159,21 @@ public abstract class LearningAgent {
         }
     }
 
-    /** Choses action based on their probabilities */
-    private int chooseActionFromPropabilities(final double[] propabilities) {
+    /** Chooses action based on their probabilities */
+    private int chooseActionFromProbabilities(final double[] probabilities) {
         Random random = new Random();
 
-        //eksploracja
+        // exploration
         if (random.nextInt(100) < 5) {
             return random.nextInt(Parameters.PRODUCT_TYPES_NO);
         }
 
         int result = 0;
-        double highest = propabilities[0];
+        double highest = probabilities[0];
         for (int i = 1; i < Parameters.PRODUCT_TYPES_NO; i++) {
-            if (propabilities[i] > highest) {
+            if (probabilities[i] > highest) {
                 result = i;
-                highest = propabilities[i];
+                highest = probabilities[i];
             }
         }
         return result;
