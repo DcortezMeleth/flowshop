@@ -34,11 +34,12 @@ public class ConfigReader {
             layers.add(new Layer(machines, ""));
         }
 
-        Model result = new Model(layers, "");
+        Model model = new Model(layers, "");
+        model.setUniverse(model);
         for (Layer layer : layers) {
-            layer.setModel(result);
+            layer.setModel(model);
         }
-        return result;
+        return model;
     }
 
     /** Reads machines configuration from file */

@@ -34,7 +34,7 @@ public class Machine extends LearningAgent {
     private Map<Integer, Integer> timeTable;
 
     public Machine(final Map<Integer, Integer> timeTable, final String classifierName) {
-        super(classifierName, new ArrayList<LearningAgent>(), Parameters.MACHINE);
+        super(new ArrayList<LearningAgent>(), Parameters.MACHINE, classifierName);
         this.timeTable = timeTable;
     }
 

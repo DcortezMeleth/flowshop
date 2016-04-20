@@ -19,7 +19,7 @@ public class Layer extends LearningAgent {
     private Model model;
 
     public Layer(final List<Machine> machines, final String classifierName) {
-        super(classifierName, machines, Parameters.LAYER);
+        super(machines, Parameters.LAYER, classifierName);
         this.tasksQueue = new int[Parameters.PRODUCT_TYPES_NO];
     }
 

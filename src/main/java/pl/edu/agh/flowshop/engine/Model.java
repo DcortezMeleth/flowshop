@@ -37,7 +37,7 @@ public class Model extends LearningAgent implements IEnvironment {
     private int[] finishedProducts = new int[Parameters.PRODUCT_TYPES_NO];
 
     public Model(final List<Layer> layers, final String classifierName) {
-        super(classifierName, layers, Parameters.MODEL);
+        super(layers, Parameters.MODEL, classifierName);
         this.history = new ModelHistory();
 
         /** Init attributes */

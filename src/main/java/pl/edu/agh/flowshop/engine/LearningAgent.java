@@ -1,5 +1,9 @@
 package pl.edu.agh.flowshop.engine;
 
+import agents.AbstractAgent;
+import agents.AbstractSwarm;
+import environment.IEnvironment;
+import environment.IEnvironmentSingle;
 import pl.edu.agh.flowshop.utils.Parameters;
 import weka.classifiers.Classifier;
 import weka.classifiers.bayes.BayesNet;
@@ -20,7 +24,7 @@ import java.util.Random;
  * @author Bartosz
  *         Created on 2016-03-17.
  */
-public abstract class LearningAgent {
+public abstract class LearningAgent extends AbstractAgent {
 
     /** Vector of {@link weka.core.Attribute Attributes} used for learning */
     private FastVector attributes;
@@ -46,7 +50,8 @@ public abstract class LearningAgent {
     /** Classifier used for machine to learn */
     private Classifier classifier;
 
-    public LearningAgent(final String classifierName, List<? extends LearningAgent> agents, final int level) {
+    public LearningAgent(List<? extends LearningAgent> agents, final int level, final String classifierName) {
+        super(null, null);
         this.classifierName = classifierName;
         this.agents = agents;
         this.level = level;
@@ -73,6 +78,14 @@ public abstract class LearningAgent {
 
     public void setAttributes(final FastVector attributes) {
         this.attributes = attributes;
+    }
+
+    @Override
+    public void setUniverse(final IEnvironment universe) {
+        super.setUniverse(universe);
+        for(LearningAgent agent : getAgents()) {
+            agent.setUniverse(universe);
+        }
     }
 
     /**
