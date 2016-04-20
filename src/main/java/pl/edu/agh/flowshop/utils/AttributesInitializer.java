@@ -11,7 +11,8 @@ import weka.core.FastVector;
  */
 public abstract class AttributesInitializer {
 
-    public static void initAttributes(final Model model) {//count number of attributes for learning
+    public static void initAttributes(final Model model) {
+        //count number of attributes for learning
         int attrNo = Parameters.PRODUCT_TYPES_NO * model.getAgents().size();
         for (LearningAgent layer : model.getAgents()) {
             attrNo += layer.getAgents().size();

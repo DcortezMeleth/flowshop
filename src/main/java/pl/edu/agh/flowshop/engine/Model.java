@@ -7,6 +7,7 @@ import environment.IAction;
 import environment.IEnvironment;
 import environment.IState;
 import org.apache.commons.math3.distribution.PoissonDistribution;
+import pl.edu.agh.flowshop.entity.AgentState;
 import pl.edu.agh.flowshop.entity.Order;
 import pl.edu.agh.flowshop.utils.AttributesInitializer;
 import pl.edu.agh.flowshop.utils.OrderComparator;
@@ -46,8 +47,7 @@ public class Model extends LearningAgent implements IEnvironment {
     public void run() throws Exception {
         PoissonDistribution random = new PoissonDistribution(3);
         Queue<Order> orders =
-                MinMaxPriorityQueue.orderedBy(new OrderComparator()).maximumSize(Parameters.QUEUE_SIZE).create();//
-        // EvictingQueue.create(Parameters.QUEUE_SIZE);
+                MinMaxPriorityQueue.orderedBy(new OrderComparator()).maximumSize(Parameters.QUEUE_SIZE).create();
         Order order;
         int[] products;
         int newOrderTurn = random.sample();
@@ -188,12 +188,16 @@ public class Model extends LearningAgent implements IEnvironment {
         return new Order(order, random.nextInt(10) + 8, reward, penalty, reward);
     }
 
+
     /**
      * Data instance used for holding model history.
+     *
+     * @author Bartosz
+     *         Created on 2016-04-20.
      */
-    private class ModelHistory {
+    public class ModelHistory {
 
-        private Queue<List<Integer>> entries = EvictingQueue.create(Parameters.USED_HISTORY);
+        private Queue<AgentState> entries = EvictingQueue.create(Parameters.USED_HISTORY);
 
         /** Adds entry to {@link #entries} set */
         public void addEntry(final List<? extends LearningAgent> agents) {
@@ -207,22 +211,25 @@ public class Model extends LearningAgent implements IEnvironment {
                     entry.add(((Machine) agent1).isBroken() ? 0 : 1);
                 }
             }
-            this.entries.add(entry);
+            AgentState state = new AgentState(Model.this);
+            state.setAttrValues(entry);
+            this.entries.add(state);
         }
 
         /** Creates instance of training data based on model history */
         public Instance getTrainingExample(final int reward) {
-            Instance instance = new SparseInstance(getAttributes().size());
+            Instance instance = new SparseInstance(Model.this.getAttributes().size());
 
             int attrIdx = 0;
-            for (List<Integer> entry : this.entries) {
-                for (Integer val : entry) {
+            for (AgentState entry : this.entries) {
+                for (Integer val : entry.getAttrValues()) {
                     instance.setValue(attrIdx, val);
                 }
             }
-            instance.setValue((Attribute) getAttributes().lastElement(), reward > Parameters.DECISION_THRESHOLD ? "GOOD" : "BAD");
+            instance.setValue((Attribute) Model.this.getAttributes().lastElement(), reward > Parameters.DECISION_THRESHOLD ? "GOOD" : "BAD");
 
             return instance;
         }
+
     }
 }
