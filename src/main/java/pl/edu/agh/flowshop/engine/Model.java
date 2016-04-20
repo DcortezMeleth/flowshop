@@ -85,10 +85,10 @@ public class Model extends LearningAgent implements IEnvironment {
     @Override
     public ActionList getActionList(final IState iState) {
         ActionList result = new ActionList(iState);
-        for(int productNo=0; productNo < Parameters.PRODUCT_TYPES_NO; productNo++) {
-            for(LearningAgent agent : getAgents()) {
+        for (int productNo = 0; productNo < Parameters.PRODUCT_TYPES_NO; productNo++) {
+            for (LearningAgent agent : getAgents()) {
                 Layer layer = (Layer) agent;
-                for(LearningAgent agent1 : layer.getAgents()) {
+                for (LearningAgent agent1 : layer.getAgents()) {
                     result.add(new Action(agent1.getId(), productNo));
                 }
             }
@@ -103,7 +103,8 @@ public class Model extends LearningAgent implements IEnvironment {
         Action action = (Action) iAction;
 
         AgentState result = new AgentState(this);
-        result.setAttrValues(getAttributesValues(true, action.getAgentNo(), action.getProductToProcess()));
+        result.setAttrValues(getAttributesValues(true, state.getAttrValues(), action.getAgentNo(),
+                action.getProductToProcess()));
 
         return result;
     }
@@ -113,18 +114,18 @@ public class Model extends LearningAgent implements IEnvironment {
         int[] buffersBefore = new int[Parameters.PRODUCT_TYPES_NO];
         int[] buffersAfter = new int[Parameters.PRODUCT_TYPES_NO];
 
-        for(int i=0; i<getAttributes().size(); i++) {
+        for (int i = 0; i < getAttributes().size(); i++) {
             Attribute attr = (Attribute) getAttributes().elementAt(i);
             String attrName = attr.name();
-            if(attrName.contains(AttributesInitializer.BUFFER_PREFIX)) {
+            if (attrName.contains(AttributesInitializer.BUFFER_PREFIX)) {
                 int productNo = Character.getNumericValue(attrName.charAt(attrName.length()));
-                buffersBefore[productNo] += ((AgentState)iState).getAttrValues().get(i);
-                buffersAfter[productNo] += ((AgentState)iState1).getAttrValues().get(i);
+                buffersBefore[productNo] += ((AgentState) iState).getAttrValues().get(i);
+                buffersAfter[productNo] += ((AgentState) iState1).getAttrValues().get(i);
             }
         }
 
         int result = 0;
-        for(int i=0; i<Parameters.PRODUCT_TYPES_NO; i++) {
+        for (int i = 0; i < Parameters.PRODUCT_TYPES_NO; i++) {
             result += buffersBefore[i] - buffersAfter[i];
         }
 
@@ -160,6 +161,11 @@ public class Model extends LearningAgent implements IEnvironment {
         return instance;
     }
 
+    /** Returns attributes list in form of integer list */
+    private List<Integer> getAttributesValues() {
+        return getAttributesValues(false, null, 0, 0);
+    }
+
     /** Set attributes values in given instance */
     private void setAttributesValues(final Instance instance) {
         int attrIdx = 0;
@@ -168,42 +174,47 @@ public class Model extends LearningAgent implements IEnvironment {
         }
     }
 
-    /** Returns attributes list in form of integer list */
-    private List<Integer> getAttributesValues() {
-        return getAttributesValues(false, 0, 0);
-    }
-
-
     /**
      * Returns attributes list in form of integer list
      *
-     * @param simulate if we should simulate one turn
-     * @param agentNo no. of agent performing an action
-     * @param action action performed by agent
+     * @param simulate   if we should simulate one turn
+     * @param attrValues starting attributes values for simulation
+     * @param agentNo    no. of agent performing an action
+     * @param action     action performed by agent
      */
-    private List<Integer> getAttributesValues(final boolean simulate, final int agentNo, final int action) {
+    private List<Integer> getAttributesValues(final boolean simulate, final List<Integer> attrValues, final int agentNo, final int action) {
         List<Integer> result = new ArrayList<>();
         int[] producedProducts = new int[Parameters.PRODUCT_TYPES_NO];
         int[] addToProducts = new int[Parameters.PRODUCT_TYPES_NO];
         int[] takenFromBufferProducts = new int[Parameters.PRODUCT_TYPES_NO];
 
+        int attrNo = 0;
         for (LearningAgent agent : getAgents()) {
             Layer layer = (Layer) agent;
 
             for (LearningAgent agent1 : layer.getAgents()) {
                 Machine machine = (Machine) agent1;
-                if(machine.getProductToBeProcessed() > -1) {
+                if (machine.getProductToBeProcessed() > -1) {
                     producedProducts[machine.getProductToBeProcessed()] += 1;
                     int nextProductType = agentNo == machine.getId() ? action : machine.getProductToBeProcessed();
                     takenFromBufferProducts[nextProductType] += 1;
                 }
                 result.add(machine.isBroken() ? 0 : 1);
+                attrNo++;
             }
 
             for (int i = 0; i < Parameters.PRODUCT_TYPES_NO; i++) {
                 int quantity = layer.getQuantityInBuffer(i);
-                quantity = simulate ? quantity + addToProducts[i] - takenFromBufferProducts[i] : quantity;
+
+                if (simulate) {
+                    quantity = attrValues.get(attrNo) + addToProducts[i] - takenFromBufferProducts[i];
+                }
+
+                if (quantity < 0) {
+                    quantity = 0;
+                }
                 result.add(quantity);
+                attrNo++;
             }
 
             addToProducts = producedProducts;
