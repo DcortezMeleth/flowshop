@@ -12,15 +12,23 @@ import java.util.Objects;
  */
 public class Action implements IAction {
 
+    /** Number of agent in learning layer */
+    private final int agentNo;
+
     /** Product type to process */
     private final int productToProcess;
 
-    public Action(final int productToProcess) {
+    public Action(final int agentNo, final int productToProcess) {
+        this.agentNo = agentNo;
         this.productToProcess = productToProcess;
     }
 
     public int getProductToProcess() {
         return productToProcess;
+    }
+
+    public int getAgentNo() {
+        return agentNo;
     }
 
     @Override
@@ -35,7 +43,7 @@ public class Action implements IAction {
 
     @Override
     public Object copy() {
-        return new Action(this.productToProcess);
+        return new Action(agentNo, this.productToProcess);
     }
 
     @Override

@@ -42,6 +42,14 @@ public class Machine extends LearningAgent {
         return broken;
     }
 
+    /** Returns product machine is going to finish in next turn. -1 if it won't finish anyting */
+    public int getProductToBeProcessed() {
+        if (this.turnsLeft <= 1 && this.productType > -1) {
+            return this.productType;
+        }
+        return -1;
+    }
+
     @Override
     protected int[] tick(final int turnNo, final int[] newTasks) throws Exception {
         int[] processed = new int[Parameters.PRODUCT_TYPES_NO];
@@ -54,7 +62,7 @@ public class Machine extends LearningAgent {
         }
 
         //take task from queue
-        if (this.turnsLeft <= 0) {
+        if (this.turnsLeft <= 0 && newTasks[this.productType] > 0) {
             newTasks[this.productType] -= 1;
             this.turnsLeft = this.timeTable.get(this.productType + 1);
         }

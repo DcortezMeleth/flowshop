@@ -11,6 +11,12 @@ import weka.core.FastVector;
  */
 public abstract class AttributesInitializer {
 
+    /** Attribute holding buffer content prefix */
+    public static final String BUFFER_PREFIX = "_buffer_";
+
+    /** Attribute holding health info prefix */
+    public static final String HEALTH_PREFIX = "_health_";
+
     public static void initAttributes(final Model model) {
         //count number of attributes for learning
         int attrNo = Parameters.PRODUCT_TYPES_NO * model.getAgents().size();
@@ -22,19 +28,17 @@ public abstract class AttributesInitializer {
 
         // attributes initialization, for now same for all learning layers
         FastVector attributes = new FastVector(attrNo);
-        final String healthPrefix = "health_";
-        final String bufferPrefix = "buffer_";
         for (int i = 0; i < Parameters.USED_HISTORY; i++) {
             for (LearningAgent layer : model.getAgents()) {
                 layer.setAttributes(attributes);
-                for (int j = 1; j <= Parameters.PRODUCT_TYPES_NO; j++) {
-                    Attribute buffer = new Attribute(i + " " + bufferPrefix + layer.getId() + "_" + j);
-                    attributes.addElement(buffer);
-                }
                 for (LearningAgent machine : layer.getAgents()) {
-                    Attribute health = new Attribute(i + " " + healthPrefix + machine.getId());
-                    attributes.addElement(health);
                     machine.setAttributes(attributes);
+                    Attribute health = new Attribute(i + " " + HEALTH_PREFIX + machine.getId());
+                    attributes.addElement(health);
+                }
+                for (int j = 1; j <= Parameters.PRODUCT_TYPES_NO; j++) {
+                    Attribute buffer = new Attribute(i + " " + BUFFER_PREFIX + layer.getId() + "_" + j);
+                    attributes.addElement(buffer);
                 }
             }
         }
