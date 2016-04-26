@@ -1,6 +1,7 @@
 package pl.edu.agh.flowshop.entity;
 
 import environment.AbstractState;
+import environment.ActionList;
 import environment.IEnvironment;
 import environment.IState;
 

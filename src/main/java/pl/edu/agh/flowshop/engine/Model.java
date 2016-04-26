@@ -89,7 +89,9 @@ public class Model extends LearningAgent implements IEnvironment {
             for (LearningAgent agent : getAgents()) {
                 Layer layer = (Layer) agent;
                 for (LearningAgent agent1 : layer.getAgents()) {
-                    result.add(new Action(agent1.getId(), productNo));
+                    if(!((Machine)agent1).isWorking()) {
+                        result.add(new Action(agent1.getId(), productNo));
+                    }
                 }
             }
         }

@@ -1,9 +1,10 @@
 package pl.edu.agh.flowshop.engine;
 
 import agents.AbstractAgent;
-import agents.AbstractSwarm;
+import environment.ActionList;
 import environment.IEnvironment;
-import environment.IEnvironmentSingle;
+import environment.IState;
+import pl.edu.agh.flowshop.entity.Action;
 import pl.edu.agh.flowshop.utils.Parameters;
 import weka.classifiers.Classifier;
 import weka.classifiers.bayes.BayesNet;
@@ -50,6 +51,9 @@ public abstract class LearningAgent extends AbstractAgent {
     /** Classifier used for machine to learn */
     private Classifier classifier;
 
+    /** Variable for holding id of agent which should act */
+    private int choosenMachineId;
+
     public LearningAgent(List<? extends LearningAgent> agents, final int level, final String classifierName) {
         super(null, null);
         this.classifierName = classifierName;
@@ -85,6 +89,22 @@ public abstract class LearningAgent extends AbstractAgent {
         super.setUniverse(universe);
         for(LearningAgent agent : getAgents()) {
             agent.setUniverse(universe);
+        }
+    }
+
+    @Override
+    public void setOldState(final IState oldState) {
+        super.setOldState(oldState);
+        for(LearningAgent agent : getAgents()) {
+            agent.setOldState(oldState);
+        }
+    }
+
+    @Override
+    public void setCurrentState(final IState currentState) {
+        super.setCurrentState(currentState);
+        for(LearningAgent agent : getAgents()) {
+            agent.setCurrentState(currentState);
         }
     }
 
@@ -142,8 +162,25 @@ public abstract class LearningAgent extends AbstractAgent {
         data.setClassIndex(data.numAttributes() - 1);
         instance.setDataset(data);
 
-        double[] probabilities = getClassifier().distributionForInstance(instance);
-        return chooseActionFromProbabilities(probabilities);
+        //if classifier != null we use weka for decisions
+        if(getClassifier() != null) {
+            double[] probabilities = getClassifier().distributionForInstance(instance);
+            return chooseActionFromProbabilities(probabilities);
+        } else {
+
+            Action action = (Action) act();
+            return action.getProductToProcess();
+        }
+    }
+
+    @Override
+    protected ActionList getActionList() {
+        ActionList result = new ActionList(getCurrentState());
+        for (int productNo = 0; productNo < Parameters.PRODUCT_TYPES_NO; productNo++) {
+            result.add(new Action(choosenMachineId, productNo));
+        }
+
+        return result;
     }
 
     /** Adds products from list2 to list1 */
@@ -166,8 +203,10 @@ public abstract class LearningAgent extends AbstractAgent {
                 this.classifier = new BayesNet();
                 break;
             case "NaiveBayes":
-            default:
                 this.classifier = new NaiveBayes();
+                break;
+            default:
+                this.classifier = null;
                 break;
         }
     }

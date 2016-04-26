@@ -39,7 +39,11 @@ public class Machine extends LearningAgent {
     }
 
     public boolean isBroken() {
-        return broken;
+        return this.broken;
+    }
+
+    public boolean isWorking() {
+        return this.turnsLeft > 0 && !this.broken;
     }
 
     /** Returns product machine is going to finish in next turn. -1 if it won't finish anyting */
@@ -84,12 +88,10 @@ public class Machine extends LearningAgent {
             return;
         }
 
-        //we check whether we should generate choice or its generated above
-        int result = action >= 0 ? action : getAction(instance);
-        if (result != this.productType) {
+        if (action != this.productType) {
             this.turnsLeft++;
         }
-        this.productType = result;
+        this.productType = action;
     }
 
     /**
