@@ -27,17 +27,14 @@ import java.util.Random;
  */
 public abstract class LearningAgent extends AbstractAgent {
 
-    /** Vector of {@link weka.core.Attribute Attributes} used for learning */
-    private FastVector attributes;
-
     /** Agents counter */
     private static int counter = 0;
 
-    /** learning level -> machine = -1, layer = -2, model=-3 */
-    protected final int level;
-
     /** Agent id */
     private final int id;
+
+    /** Learning level -> machine = -1, layer = -2, model=-3 */
+    protected int level = Parameters.MACHINE;
 
     /** Lower agents layer */
     protected List<? extends LearningAgent> agents;
@@ -47,6 +44,9 @@ public abstract class LearningAgent extends AbstractAgent {
 
     /** Train set used to teach {@link #classifier} */
     protected Instances trainSet;
+
+    /** Vector of {@link weka.core.Attribute Attributes} used for learning */
+    private FastVector attributes;
 
     /** Classifier used for machine to learn */
     private Classifier classifier;
@@ -73,9 +73,6 @@ public abstract class LearningAgent extends AbstractAgent {
         return this.agents;
     }
 
-    /** Simulates one turn for agent */
-    protected abstract int[] tick(final int turnNo, final int[] newTasks) throws Exception;
-
     public FastVector getAttributes() {
         return attributes;
     }
@@ -85,9 +82,17 @@ public abstract class LearningAgent extends AbstractAgent {
     }
 
     @Override
+    public void setCurrentState(final IState currentState) {
+        super.setCurrentState(currentState);
+        for (LearningAgent agent : getAgents()) {
+            agent.setCurrentState(currentState);
+        }
+    }
+
+    @Override
     public void setUniverse(final IEnvironment universe) {
         super.setUniverse(universe);
-        for(LearningAgent agent : getAgents()) {
+        for (LearningAgent agent : getAgents()) {
             agent.setUniverse(universe);
         }
     }
@@ -95,34 +100,34 @@ public abstract class LearningAgent extends AbstractAgent {
     @Override
     public void setOldState(final IState oldState) {
         super.setOldState(oldState);
-        for(LearningAgent agent : getAgents()) {
+        for (LearningAgent agent : getAgents()) {
             agent.setOldState(oldState);
         }
     }
 
     @Override
-    public void setCurrentState(final IState currentState) {
-        super.setCurrentState(currentState);
-        for(LearningAgent agent : getAgents()) {
-            agent.setCurrentState(currentState);
+    protected ActionList getActionList() {
+        ActionList result = new ActionList(getCurrentState());
+        for (int productNo = 0; productNo < Parameters.PRODUCT_TYPES_NO; productNo++) {
+            result.add(new Action(choosenMachineId, productNo));
         }
+
+        return result;
     }
 
-    /**
-     * Classifies given example based on {@link #classifier} decision.
-     *
-     * @param action   chosen action, -1 if machine should choose itself
-     * @param instance instance to decide on
-     * @throws Exception
-     */
-    protected void decideOnAction(final int action, final Instance instance) throws Exception {
-        for (LearningAgent agent : this.agents) {
-            agent.decideOnAction(getAction(instance), instance);
-        }
+    public void setLevel(final int level) {
+        this.level = level;
     }
+
+    /** Simulates one turn for agent */
+    protected abstract int[] tick(final int turnNo, final int[] newTasks) throws Exception;
 
     /** Fires learning process for this machine */
     protected void train() throws Exception {
+        if (this.trainSet == null) {
+            this.trainSet = new Instances("TrainSet", getAttributes(), 0);
+            this.trainSet.setClassIndex(this.trainSet.numAttributes() - 1);
+        }
         getClassifier().buildClassifier(this.trainSet);
         for (LearningAgent agent : this.agents) {
             agent.train();
@@ -152,6 +157,19 @@ public abstract class LearningAgent extends AbstractAgent {
         return this.classifier;
     }
 
+    /**
+     * Classifies given example based on {@link #classifier} decision.
+     *
+     * @param action   chosen action, -1 if machine should choose itself
+     * @param instance instance to decide on
+     * @throws Exception
+     */
+    protected void decideOnAction(final int action, final Instance instance) throws Exception {
+        for (LearningAgent agent : this.agents) {
+            agent.decideOnAction(getAction(instance), instance);
+        }
+    }
+
     /** Return number of product which should be worked on */
     protected int getAction(final Instance instance) throws Exception {
         if (this.level != Parameters.LEARNING_LEVEL) {
@@ -163,7 +181,7 @@ public abstract class LearningAgent extends AbstractAgent {
         instance.setDataset(data);
 
         //if classifier != null we use weka for decisions
-        if(getClassifier() != null) {
+        if (getClassifier() != null) {
             double[] probabilities = getClassifier().distributionForInstance(instance);
             return chooseActionFromProbabilities(probabilities);
         } else {
@@ -171,16 +189,6 @@ public abstract class LearningAgent extends AbstractAgent {
             Action action = (Action) act();
             return action.getProductToProcess();
         }
-    }
-
-    @Override
-    protected ActionList getActionList() {
-        ActionList result = new ActionList(getCurrentState());
-        for (int productNo = 0; productNo < Parameters.PRODUCT_TYPES_NO; productNo++) {
-            result.add(new Action(choosenMachineId, productNo));
-        }
-
-        return result;
     }
 
     /** Adds products from list2 to list1 */
@@ -206,7 +214,7 @@ public abstract class LearningAgent extends AbstractAgent {
                 this.classifier = new NaiveBayes();
                 break;
             default:
-                this.classifier = null;
+                this.classifier = new J48();
                 break;
         }
     }
@@ -216,7 +224,7 @@ public abstract class LearningAgent extends AbstractAgent {
         Random random = new Random();
 
         // exploration
-        if (random.nextInt(100) < 5) {
+        if (random.nextInt(100) < 5 || probabilities.length != Parameters.PRODUCT_TYPES_NO) {
             return random.nextInt(Parameters.PRODUCT_TYPES_NO);
         }
 

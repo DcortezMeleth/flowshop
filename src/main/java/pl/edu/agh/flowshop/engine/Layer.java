@@ -32,6 +32,15 @@ public class Layer extends LearningAgent {
         return this.tasksQueue[productType];
     }
 
+    /** Returns summed number of products in queue */
+    public int getQueueSize() {
+        int result = 0;
+        for(int i=0; i<Parameters.PRODUCT_TYPES_NO; i++) {
+            result += tasksQueue[i];
+        }
+        return result;
+    }
+
     @Override
     public int[] tick(final int turnNo, final int[] newTasks) throws Exception {
         //add new tasks to queue

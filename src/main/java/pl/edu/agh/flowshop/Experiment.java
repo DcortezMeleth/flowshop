@@ -2,6 +2,13 @@ package pl.edu.agh.flowshop;
 
 import pl.edu.agh.flowshop.engine.Model;
 import pl.edu.agh.flowshop.utils.ConfigReader;
+import pl.edu.agh.flowshop.utils.GraphPanel;
+
+import javax.swing.*;
+import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 /**
  * @author Bartosz
@@ -10,12 +17,28 @@ import pl.edu.agh.flowshop.utils.ConfigReader;
 public class Experiment {
 
     public static void main(String[] args) {
-        //TODO: dodac logowanie
         try {
+            GraphPanel graph;
+            //SwingUtilities.invokeLater(new Runnable() {
+            //    public void run() {
+            graph = createAndShowGui();
+            //    }
+            //});
             Model model = ConfigReader.createModel();
-            model.run();
+            model.run(graph);
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private static GraphPanel createAndShowGui() {
+        GraphPanel mainPanel = new GraphPanel(new ArrayList<Double>());
+        JFrame frame = new JFrame("FlowShop_Graph");
+        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        frame.getContentPane().add(mainPanel);
+        frame.pack();
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
+        return mainPanel;
     }
 }

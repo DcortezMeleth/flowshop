@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import pl.edu.agh.flowshop.engine.Layer;
+import pl.edu.agh.flowshop.engine.LearningAgent;
 import pl.edu.agh.flowshop.engine.Machine;
 import pl.edu.agh.flowshop.engine.Model;
 
@@ -38,6 +39,9 @@ public class ConfigReader {
         model.setUniverse(model);
         for (Layer layer : layers) {
             layer.setModel(model);
+            for(LearningAgent agent : layer.getAgents()) {
+                agent.setLevel(Parameters.MACHINE);
+            }
         }
         return model;
     }

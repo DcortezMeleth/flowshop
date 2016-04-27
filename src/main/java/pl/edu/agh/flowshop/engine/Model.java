@@ -11,6 +11,7 @@ import pl.edu.agh.flowshop.entity.Action;
 import pl.edu.agh.flowshop.entity.AgentState;
 import pl.edu.agh.flowshop.entity.Order;
 import pl.edu.agh.flowshop.utils.AttributesInitializer;
+import pl.edu.agh.flowshop.utils.GraphPanel;
 import pl.edu.agh.flowshop.utils.OrderComparator;
 import pl.edu.agh.flowshop.utils.Parameters;
 import weka.core.Attribute;
@@ -44,19 +45,23 @@ public class Model extends LearningAgent implements IEnvironment {
         AttributesInitializer.initAttributes(this);
     }
 
-    /** Experiment main loop */
-    public void run() throws Exception {
+    /**
+     * Experiment main loop
+     * @param graph graph where we should draw results
+     */
+    public void run(final GraphPanel graph) throws Exception {
         PoissonDistribution random = new PoissonDistribution(3);
         Queue<Order> orders =
                 MinMaxPriorityQueue.orderedBy(new OrderComparator()).maximumSize(Parameters.QUEUE_SIZE).create();
         Order order;
         int[] products;
         int newOrderTurn = random.sample();
+        List<Double> results = new ArrayList<>();
 
         //main loop
         for (int turnNo = 0; turnNo < Parameters.TURN_LIMIT; turnNo++) {
             //train on collected data
-            if (turnNo % Parameters.LEARNING_TURN == 0 && turnNo != 0) {
+            if (turnNo % Parameters.LEARNING_TURN == 0) {
                 train();
             }
 
@@ -79,7 +84,20 @@ public class Model extends LearningAgent implements IEnvironment {
             for (Order order1 : orders) {
                 order1.decreaseDueTime();
             }
+
+            results.add(getQueuesSize());
+            graph.setScores(results);
         }
+    }
+
+    /** Return number of all product in all queues */
+    private Double getQueuesSize() {
+        double result = 0;
+        for(LearningAgent agent : getAgents()) {
+            Layer layer = (Layer) agent;
+            result += layer.getQueueSize();
+        }
+        return result;
     }
 
     @Override

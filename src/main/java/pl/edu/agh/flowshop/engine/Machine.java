@@ -88,10 +88,15 @@ public class Machine extends LearningAgent {
             return;
         }
 
-        if (action != this.productType) {
+        int actionToChoose = action;
+        if(action < 0) {
+            actionToChoose = getAction(instance);
+        }
+
+        if (actionToChoose != this.productType) {
             this.turnsLeft++;
         }
-        this.productType = action;
+        this.productType = actionToChoose;
     }
 
     /**
