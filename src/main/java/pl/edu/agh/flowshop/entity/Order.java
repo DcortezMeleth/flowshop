@@ -37,7 +37,7 @@ public class Order {
     public int getValue() {
         int result = 0;
         for (int i = 0; i < Parameters.PRODUCT_TYPES_NO; i++) {
-            result += productsList[i] * Parameters.COSTS.get(i + 1);
+            result += productsList[i] * Parameters.COSTS.get(i);
         }
         return result;
     }
