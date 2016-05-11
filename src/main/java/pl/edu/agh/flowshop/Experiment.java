@@ -5,10 +5,8 @@ import pl.edu.agh.flowshop.utils.ConfigReader;
 import pl.edu.agh.flowshop.utils.GraphPanel;
 
 import javax.swing.*;
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 /**
  * @author Bartosz
@@ -25,7 +23,8 @@ public class Experiment {
             //    }
             //});
             Model model = ConfigReader.createModel();
-            model.run(graph);
+            List<Double> results = model.run();
+            graph.setScores(results);
         } catch (Exception e) {
             e.printStackTrace();
         }

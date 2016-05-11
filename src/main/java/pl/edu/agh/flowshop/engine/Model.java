@@ -11,7 +11,6 @@ import pl.edu.agh.flowshop.entity.Action;
 import pl.edu.agh.flowshop.entity.AgentState;
 import pl.edu.agh.flowshop.entity.Order;
 import pl.edu.agh.flowshop.utils.Attributes;
-import pl.edu.agh.flowshop.utils.GraphPanel;
 import pl.edu.agh.flowshop.utils.OrderComparator;
 import pl.edu.agh.flowshop.utils.Parameters;
 import weka.core.Attribute;
@@ -31,6 +30,16 @@ import java.util.Random;
  */
 public class Model implements IEnvironment {
 
+    public static final int MAX_ORDER_SIZE = 5;
+
+    public static final int MAX_REWARD_VALUE = 10;
+
+    public static final int DUE_TIME_RAND_MAX = 10;
+
+    public static final int DUE_TIME_MIN_VALUE = 8;
+
+    public static final int MIN_ORDER_SIZE = 3;
+
     /** Model history used for learning */
     private final ModelHistory history;
 
@@ -39,6 +48,8 @@ public class Model implements IEnvironment {
 
     /** Layers inside model. */
     private List<Layer> layers;
+
+    private List<Order> finishedOrders = new ArrayList<>();
 
     public Model(final List<Layer> layers) {
         this.history = new ModelHistory();
@@ -51,16 +62,16 @@ public class Model implements IEnvironment {
     /**
      * Experiment main loop
      *
-     * @param graph graph where we should draw results
+     * @return return queue sizes from each iteration
      */
-    public void run(final GraphPanel graph) throws Exception {
+    public List<Double> run() throws Exception {
         PoissonDistribution random = new PoissonDistribution(3);
         Queue<Order> orders =
                 MinMaxPriorityQueue.orderedBy(new OrderComparator()).maximumSize(Parameters.QUEUE_SIZE).create();
         Order order;
         int[] products;
         int newOrderTurn = random.sample();
-        List<Double> results = new ArrayList<>();
+        List<Double> queueSizes = new ArrayList<>();
 
         //main loop
         for (int turnNo = 0; turnNo < Parameters.TURN_LIMIT; turnNo++) {
@@ -98,9 +109,12 @@ public class Model implements IEnvironment {
                 order1.decreaseDueTime();
             }
 
-            results.add(getQueuesSize());
-            graph.setScores(results);
+            queueSizes.add(getQueuesSize());
+            System.out.println("Orders size:" + orders.size());
+            System.out.println("Finished orders size:" + finishedOrders.size());
         }
+
+        return queueSizes;
     }
 
     @Override
@@ -267,7 +281,7 @@ public class Model implements IEnvironment {
             for (int j = 0; j < finishedProducts.length; j++) {
                 finishedProducts[j] -= product[j];
             }
-            orders.poll();
+            finishedOrders.add(orders.poll());
 
             reward += order.getReward() + order.getValue();
             if (order.getDueTime() > 0) {
@@ -278,7 +292,6 @@ public class Model implements IEnvironment {
             for (Layer layer : this.layers) {
                 for (Machine machine : layer.getMachines()) {
                     machine.addTrainData(this.history.getTrainingExample(reward));
-                    machine.train();
                 }
             }
         }
@@ -290,11 +303,12 @@ public class Model implements IEnvironment {
     private Order generateOrder() {
         Random random = new Random();
         int[] order = new int[Parameters.PRODUCT_TYPES_NO];
+        order[random.nextInt(order.length)] = random.nextInt(MAX_ORDER_SIZE - MIN_ORDER_SIZE) + MIN_ORDER_SIZE;
 
-        int reward = Parameters.REWARD != 0 ? Parameters.REWARD : random.nextInt(10);
+        int reward = Parameters.REWARD != 0 ? Parameters.REWARD : random.nextInt(MAX_REWARD_VALUE);
         int penalty = Parameters.PENALTY != 0 ? (int) (reward * Parameters.PENALTY) : random.nextInt(reward);
 
-        return new Order(order, random.nextInt(10) + 8, reward, penalty, reward);
+        return new Order(order, random.nextInt(DUE_TIME_RAND_MAX) + DUE_TIME_MIN_VALUE, reward, penalty, reward);
     }
 
     /** Adds products from list2 to list1 */
