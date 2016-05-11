@@ -81,21 +81,25 @@ public class Machine extends LearningAgent {
         return processed;
     }
 
-    @Override
-    protected void decideOnAction(final int action, final Instance instance) throws Exception {
+    /**
+     * Classifies given example based on {@link #classifier} decision.
+     *
+     * @param instance instance to decide on
+     * @throws Exception
+     */
+    protected void decideOnAction(final Instance instance) throws Exception {
         //changing production type while working is forbidden
         if (this.turnsLeft > 0) {
             return;
         }
 
-        int actionToChoose = action;
-        if(action < 0) {
-            actionToChoose = getAction(instance);
-        }
+        int actionToChoose = getAction(instance);
 
+        // zmienilismy typ -> czekamy ture
         if (actionToChoose != this.productType) {
             this.turnsLeft++;
         }
+
         this.productType = actionToChoose;
     }
 

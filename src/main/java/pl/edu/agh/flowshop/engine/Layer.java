@@ -10,7 +10,13 @@ import java.util.List;
  * @author Bartosz
  *         Created on 2016-03-09.
  */
-public class Layer extends LearningAgent {
+public class Layer {
+
+    /** layers counter */
+    private static int count = 0;
+
+    /** layer */
+    private final int id;
 
     /** Tasks queue */
     private int[] tasksQueue;
@@ -18,13 +24,21 @@ public class Layer extends LearningAgent {
     /** Model to whom layer belongs */
     private Model model;
 
-    public Layer(final List<Machine> machines, final String classifierName) {
-        super(machines, Parameters.LAYER, classifierName);
+    /** machines list */
+    private List<Machine> machines;
+
+    public Layer(final List<Machine> machines) {
         this.tasksQueue = new int[Parameters.PRODUCT_TYPES_NO];
+        this.machines = machines;
+        this.id = ++count;
     }
 
     public void setModel(final Model model) {
         this.model = model;
+    }
+
+    public int getId() {
+        return id;
     }
 
     /** Returns quantity of product type in buffer */
@@ -35,27 +49,38 @@ public class Layer extends LearningAgent {
     /** Returns summed number of products in queue */
     public int getQueueSize() {
         int result = 0;
-        for(int i=0; i<Parameters.PRODUCT_TYPES_NO; i++) {
+        for (int i = 0; i < Parameters.PRODUCT_TYPES_NO; i++) {
             result += tasksQueue[i];
         }
         return result;
     }
 
-    @Override
+    public List<Machine> getMachines() {
+        return machines;
+    }
+
     public int[] tick(final int turnNo, final int[] newTasks) throws Exception {
         //add new tasks to queue
-        addProducts(this.tasksQueue, newTasks);
+        addArrayElements(this.tasksQueue, newTasks);
 
         //chance for changing processing product type
-        model.decideOnAction(Parameters.LEARNING_LEVEL, model.prepareInstanceForDecision());
+        for (Machine machine : this.machines) {
+            machine.decideOnAction(model.prepareInstanceForDecision());
+        }
 
         //tick for machines
         int[] finishedProducts = new int[Parameters.PRODUCT_TYPES_NO];
-        for (LearningAgent machine : getAgents()) {
-            addProducts(finishedProducts, machine.tick(turnNo, this.tasksQueue));
+        for (Machine machine : this.machines) {
+            addArrayElements(finishedProducts, machine.tick(turnNo, this.tasksQueue));
         }
 
         return finishedProducts;
     }
 
+    /** Adds products from list2 to list1 */
+    private void addArrayElements(final int[] list1, final int[] list2) {
+        for (int i = 0; i < Parameters.PRODUCT_TYPES_NO; i++) {
+            list1[i] += list2[i];
+        }
+    }
 }

@@ -10,7 +10,7 @@ import org.apache.commons.math3.distribution.PoissonDistribution;
 import pl.edu.agh.flowshop.entity.Action;
 import pl.edu.agh.flowshop.entity.AgentState;
 import pl.edu.agh.flowshop.entity.Order;
-import pl.edu.agh.flowshop.utils.AttributesInitializer;
+import pl.edu.agh.flowshop.utils.Attributes;
 import pl.edu.agh.flowshop.utils.GraphPanel;
 import pl.edu.agh.flowshop.utils.OrderComparator;
 import pl.edu.agh.flowshop.utils.Parameters;
@@ -29,7 +29,7 @@ import java.util.Random;
  * @author Bartosz Sądel
  *         Created on 11.03.2016.
  */
-public class Model extends LearningAgent implements IEnvironment {
+public class Model implements IEnvironment {
 
     /** Model history used for learning */
     private final ModelHistory history;
@@ -37,16 +37,20 @@ public class Model extends LearningAgent implements IEnvironment {
     /** Buffer of finished products waiting for delivery */
     private int[] finishedProducts = new int[Parameters.PRODUCT_TYPES_NO];
 
-    public Model(final List<Layer> layers, final String classifierName) {
-        super(layers, Parameters.MODEL, classifierName);
+    /** Layers inside model. */
+    private List<Layer> layers;
+
+    public Model(final List<Layer> layers) {
         this.history = new ModelHistory();
+        this.layers = layers;
 
         /** Init attributes */
-        AttributesInitializer.initAttributes(this);
+        Attributes.initAttributes(this);
     }
 
     /**
      * Experiment main loop
+     *
      * @param graph graph where we should draw results
      */
     public void run(final GraphPanel graph) throws Exception {
@@ -62,7 +66,11 @@ public class Model extends LearningAgent implements IEnvironment {
         for (int turnNo = 0; turnNo < Parameters.TURN_LIMIT; turnNo++) {
             //train on collected data
             if (turnNo % Parameters.LEARNING_TURN == 0) {
-                train();
+                for (Layer layer : this.layers) {
+                    for (Machine machine : layer.getMachines()) {
+                        machine.train();
+                    }
+                }
             }
 
             //generate new order
@@ -76,10 +84,15 @@ public class Model extends LearningAgent implements IEnvironment {
             }
 
             //execute turn across layers and collect finished products
-            addProducts(this.finishedProducts, tick(turnNo, products));
+            int[] finishedProducts = products;
+            for (Layer layer : this.layers) {
+                finishedProducts = layer.tick(turnNo, finishedProducts);
+            }
+
+            addArrayElements(this.finishedProducts, finishedProducts);
 
             //remove finished orders
-            deliverOrders(orders, finishedProducts);
+            deliverOrders(orders, this.finishedProducts);
 
             for (Order order1 : orders) {
                 order1.decreaseDueTime();
@@ -90,25 +103,14 @@ public class Model extends LearningAgent implements IEnvironment {
         }
     }
 
-    /** Return number of all product in all queues */
-    private Double getQueuesSize() {
-        double result = 0;
-        for(LearningAgent agent : getAgents()) {
-            Layer layer = (Layer) agent;
-            result += layer.getQueueSize();
-        }
-        return result;
-    }
-
     @Override
     public ActionList getActionList(final IState iState) {
         ActionList result = new ActionList(iState);
         for (int productNo = 0; productNo < Parameters.PRODUCT_TYPES_NO; productNo++) {
-            for (LearningAgent agent : getAgents()) {
-                Layer layer = (Layer) agent;
-                for (LearningAgent agent1 : layer.getAgents()) {
-                    if(!((Machine)agent1).isWorking()) {
-                        result.add(new Action(agent1.getId(), productNo));
+            for (Layer layer : this.layers) {
+                for (Machine machine : layer.getMachines()) {
+                    if (!machine.isWorking()) {
+                        result.add(new Action(machine.getId(), productNo));
                     }
                 }
             }
@@ -134,10 +136,10 @@ public class Model extends LearningAgent implements IEnvironment {
         int[] buffersBefore = new int[Parameters.PRODUCT_TYPES_NO];
         int[] buffersAfter = new int[Parameters.PRODUCT_TYPES_NO];
 
-        for (int i = 0; i < getAttributes().size(); i++) {
-            Attribute attr = (Attribute) getAttributes().elementAt(i);
+        for (int i = 0; i < Attributes.size(); i++) {
+            Attribute attr = (Attribute) Attributes.attributes.elementAt(i);
             String attrName = attr.name();
-            if (attrName.contains(AttributesInitializer.BUFFER_PREFIX)) {
+            if (attrName.contains(Attributes.BUFFER_PREFIX)) {
                 int productNo = Character.getNumericValue(attrName.charAt(attrName.length()));
                 buffersBefore[productNo] += ((AgentState) iState).getAttrValues().get(i);
                 buffersAfter[productNo] += ((AgentState) iState1).getAttrValues().get(i);
@@ -162,23 +164,25 @@ public class Model extends LearningAgent implements IEnvironment {
         return 0;
     }
 
-    @Override
-    protected int[] tick(final int turnNo, final int[] products) throws Exception {
-        //execute turn across layers
-        int[] products1 = products;
-        for (LearningAgent layer : getAgents()) {
-            products1 = layer.tick(turnNo, products1);
-        }
-
-        return products1;
+    public List<Layer> getLayers() {
+        return layers;
     }
 
     /** Prepares entry for decision */
     protected Instance prepareInstanceForDecision() {
-        Instance instance = new SparseInstance(getAttributes().size() - 1);
+        Instance instance = new SparseInstance(Attributes.size() - 1);
         setAttributesValues(instance);
 
         return instance;
+    }
+
+    /** Return number of all product in all queues */
+    private Double getQueuesSize() {
+        double result = 0;
+        for (Layer layer : this.layers) {
+            result += layer.getQueueSize();
+        }
+        return result;
     }
 
     /** Returns attributes list in form of integer list */
@@ -209,11 +213,8 @@ public class Model extends LearningAgent implements IEnvironment {
         int[] takenFromBufferProducts = new int[Parameters.PRODUCT_TYPES_NO];
 
         int attrNo = 0;
-        for (LearningAgent agent : getAgents()) {
-            Layer layer = (Layer) agent;
-
-            for (LearningAgent agent1 : layer.getAgents()) {
-                Machine machine = (Machine) agent1;
+        for (Layer layer : this.layers) {
+            for (Machine machine : layer.getMachines()) {
                 if (machine.getProductToBeProcessed() > -1) {
                     producedProducts[machine.getProductToBeProcessed()] += 1;
                     int nextProductType = agentNo == machine.getId() ? action : machine.getProductToBeProcessed();
@@ -273,10 +274,13 @@ public class Model extends LearningAgent implements IEnvironment {
                 reward -= order.getPenalty();
             }
 
-            this.history.addEntry(getAgents());
-            addTrainData(this.history.getTrainingExample(reward));
-
-            train();
+            this.history.addEntry();
+            for (Layer layer : this.layers) {
+                for (Machine machine : layer.getMachines()) {
+                    machine.addTrainData(this.history.getTrainingExample(reward));
+                    machine.train();
+                }
+            }
         }
 
         return reward;
@@ -293,6 +297,12 @@ public class Model extends LearningAgent implements IEnvironment {
         return new Order(order, random.nextInt(10) + 8, reward, penalty, reward);
     }
 
+    /** Adds products from list2 to list1 */
+    private void addArrayElements(final int[] list1, final int[] list2) {
+        for (int i = 0; i < Parameters.PRODUCT_TYPES_NO; i++) {
+            list1[i] += list2[i];
+        }
+    }
 
     /**
      * Data instance used for holding model history.
@@ -305,15 +315,14 @@ public class Model extends LearningAgent implements IEnvironment {
         private Queue<AgentState> entries = EvictingQueue.create(Parameters.USED_HISTORY);
 
         /** Adds entry to {@link #entries} set */
-        public void addEntry(final List<? extends LearningAgent> agents) {
+        public void addEntry() {
             List<Integer> entry = new ArrayList<>();
-            for (LearningAgent agent : agents) {
-                Layer layer = (Layer) agent;
+            for (Layer layer : layers) {
                 for (int i = 0; i < Parameters.PRODUCT_TYPES_NO; i++) {
                     entry.add(layer.getQuantityInBuffer(i));
                 }
-                for (LearningAgent agent1 : layer.getAgents()) {
-                    entry.add(((Machine) agent1).isBroken() ? 0 : 1);
+                for (Machine machine : layer.getMachines()) {
+                    entry.add(machine.isBroken() ? 0 : 1);
                 }
             }
             AgentState state = new AgentState(Model.this);
@@ -323,7 +332,7 @@ public class Model extends LearningAgent implements IEnvironment {
 
         /** Creates instance of training data based on model history */
         public Instance getTrainingExample(final int reward) {
-            Instance instance = new SparseInstance(Model.this.getAttributes().size());
+            Instance instance = new SparseInstance(Attributes.size());
 
             int attrIdx = 0;
             for (AgentState entry : this.entries) {
@@ -331,7 +340,7 @@ public class Model extends LearningAgent implements IEnvironment {
                     instance.setValue(attrIdx, val);
                 }
             }
-            instance.setValue((Attribute) Model.this.getAttributes().lastElement(), reward > Parameters.DECISION_THRESHOLD ? "GOOD" : "BAD");
+            instance.setValue((Attribute) Attributes.attributes.lastElement(), reward > Parameters.DECISION_THRESHOLD ? "GOOD" : "BAD");
 
             return instance;
         }

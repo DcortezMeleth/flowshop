@@ -51,9 +51,6 @@ public abstract class LearningAgent extends AbstractAgent {
     /** Classifier used for machine to learn */
     private Classifier classifier;
 
-    /** Variable for holding id of agent which should act */
-    private int choosenMachineId;
-
     public LearningAgent(List<? extends LearningAgent> agents, final int level, final String classifierName) {
         super(null, null);
         this.classifierName = classifierName;
@@ -109,7 +106,7 @@ public abstract class LearningAgent extends AbstractAgent {
     protected ActionList getActionList() {
         ActionList result = new ActionList(getCurrentState());
         for (int productNo = 0; productNo < Parameters.PRODUCT_TYPES_NO; productNo++) {
-            result.add(new Action(choosenMachineId, productNo));
+            result.add(new Action(id, productNo));
         }
 
         return result;
@@ -157,19 +154,6 @@ public abstract class LearningAgent extends AbstractAgent {
         return this.classifier;
     }
 
-    /**
-     * Classifies given example based on {@link #classifier} decision.
-     *
-     * @param action   chosen action, -1 if machine should choose itself
-     * @param instance instance to decide on
-     * @throws Exception
-     */
-    protected void decideOnAction(final int action, final Instance instance) throws Exception {
-        for (LearningAgent agent : this.agents) {
-            agent.decideOnAction(getAction(instance), instance);
-        }
-    }
-
     /** Return number of product which should be worked on */
     protected int getAction(final Instance instance) throws Exception {
         if (this.level != Parameters.LEARNING_LEVEL) {
@@ -188,13 +172,6 @@ public abstract class LearningAgent extends AbstractAgent {
 
             Action action = (Action) act();
             return action.getProductToProcess();
-        }
-    }
-
-    /** Adds products from list2 to list1 */
-    protected void addProducts(final int[] list1, final int[] list2) {
-        for (int i = 0; i < Parameters.PRODUCT_TYPES_NO; i++) {
-            list1[i] += list2[i];
         }
     }
 

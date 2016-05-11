@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import pl.edu.agh.flowshop.engine.Layer;
-import pl.edu.agh.flowshop.engine.LearningAgent;
 import pl.edu.agh.flowshop.engine.Machine;
 import pl.edu.agh.flowshop.engine.Model;
 
@@ -32,16 +31,12 @@ public class ConfigReader {
 
         List<Layer> layers = new ArrayList<>();
         for (List<Machine> machines : machinesConf) {
-            layers.add(new Layer(machines, ""));
+            layers.add(new Layer(machines));
         }
 
-        Model model = new Model(layers, "");
-        model.setUniverse(model);
+        Model model = new Model(layers);
         for (Layer layer : layers) {
             layer.setModel(model);
-            for(LearningAgent agent : layer.getAgents()) {
-                agent.setLevel(Parameters.MACHINE);
-            }
         }
         return model;
     }
