@@ -3,7 +3,7 @@ package pl.edu.agh.flowshop.engine;
 import pl.edu.agh.flowshop.utils.Parameters;
 import weka.core.Instance;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
@@ -31,11 +31,10 @@ public class Machine extends LearningAgent {
      * <ul>value - processing time</ul>
      * </li>
      */
-    private Map<Integer, Integer> timeTable;
+    private Map<Integer, Integer> timeTable = new HashMap<>();
 
-    public Machine(final Map<Integer, Integer> timeTable, final String classifierName) {
-        super(new ArrayList<LearningAgent>(), Parameters.MACHINE, classifierName);
-        this.timeTable = timeTable;
+    public Machine() {
+        super();
     }
 
     public boolean isBroken() {

@@ -1,7 +1,6 @@
 package pl.edu.agh.flowshop.utils;
 
 import pl.edu.agh.flowshop.engine.Layer;
-import pl.edu.agh.flowshop.engine.LearningAgent;
 import pl.edu.agh.flowshop.engine.Machine;
 import pl.edu.agh.flowshop.engine.Model;
 import weka.core.Attribute;
@@ -39,7 +38,6 @@ public abstract class Attributes {
         for (int i = 0; i < Parameters.USED_HISTORY; i++) {
             for (Layer layer : model.getLayers()) {
                 for (Machine machine : layer.getMachines()) {
-                    machine.setAttributes(attr_vec);
                     Attribute health = new Attribute(i + " " + HEALTH_PREFIX + machine.getId());
                     attr_vec.addElement(health);
                 }

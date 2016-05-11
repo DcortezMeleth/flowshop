@@ -31,26 +31,11 @@ public abstract class Parameters {
     /** Product types no. value in properties file. */
     public static final int PRODUCT_TYPES_NO;
 
-    /**
-     * Key for learning layer in properties file.
-     * Value is equal {@link #MACHINE}, {@link #LAYER} or {@link #MODEL}.
-     */
-    public static final int LEARNING_LEVEL;
-
     /** Threshold for decision between good and bad labels */
     public static final int DECISION_THRESHOLD;
 
     /** Lenght of history entries used for learning */
     public static final int USED_HISTORY;
-
-    /** Layer level of learning. */
-    public static final int MACHINE = -1;
-
-    /** Layer level of learning. */
-    public static final int LAYER = -2;
-
-    /** Layer level of learning. */
-    public static final int MODEL = -3;
 
     /** Products unit costs */
     public static final Map<Integer, Integer> COSTS;
@@ -96,7 +81,6 @@ public abstract class Parameters {
         TURN_LIMIT = Integer.parseInt(configuration.getProperty(TURN_LIMIT_KEY));
         QUEUE_SIZE = Integer.parseInt(configuration.getProperty(QUEUE_SIZE_KEY));
         PRODUCT_TYPES_NO = Integer.parseInt(configuration.getProperty(PRODUCT_TYPES_NO_KEY));
-        LEARNING_LEVEL = Integer.parseInt(configuration.getProperty(LEARNING_LEVEL_KEY));
         REWARD = Integer.parseInt(configuration.getProperty(REWARD_KEY));
         DECISION_THRESHOLD = Integer.parseInt(configuration.getProperty(DECISION_THRESHOLD_KEY));
         PENALTY = Double.parseDouble(configuration.getProperty(PENALTY_KEY));

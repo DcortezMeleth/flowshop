@@ -2,21 +2,17 @@ package pl.edu.agh.flowshop.engine;
 
 import agents.AbstractAgent;
 import environment.ActionList;
-import environment.IEnvironment;
-import environment.IState;
 import pl.edu.agh.flowshop.entity.Action;
+import pl.edu.agh.flowshop.utils.Attributes;
 import pl.edu.agh.flowshop.utils.Parameters;
 import weka.classifiers.Classifier;
 import weka.classifiers.bayes.BayesNet;
 import weka.classifiers.bayes.NaiveBayes;
 import weka.classifiers.rules.JRip;
 import weka.classifiers.trees.J48;
-import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 
 /**
@@ -33,73 +29,22 @@ public abstract class LearningAgent extends AbstractAgent {
     /** Agent id */
     private final int id;
 
-    /** Learning level -> machine = -1, layer = -2, model=-3 */
-    protected int level = Parameters.MACHINE;
-
-    /** Lower agents layer */
-    protected List<? extends LearningAgent> agents;
-
     /** Classifier name */
     protected String classifierName = "";
 
     /** Train set used to teach {@link #classifier} */
     protected Instances trainSet;
 
-    /** Vector of {@link weka.core.Attribute Attributes} used for learning */
-    private FastVector attributes;
-
     /** Classifier used for machine to learn */
     private Classifier classifier;
 
-    public LearningAgent(List<? extends LearningAgent> agents, final int level, final String classifierName) {
+    public LearningAgent() {
         super(null, null);
-        this.classifierName = classifierName;
-        this.agents = agents;
-        this.level = level;
         this.id = counter++;
     }
 
     public int getId() {
         return this.id;
-    }
-
-    public List<? extends LearningAgent> getAgents() {
-        if (this.agents == null) {
-            this.agents = new ArrayList<>();
-        }
-        return this.agents;
-    }
-
-    public FastVector getAttributes() {
-        return attributes;
-    }
-
-    public void setAttributes(final FastVector attributes) {
-        this.attributes = attributes;
-    }
-
-    @Override
-    public void setCurrentState(final IState currentState) {
-        super.setCurrentState(currentState);
-        for (LearningAgent agent : getAgents()) {
-            agent.setCurrentState(currentState);
-        }
-    }
-
-    @Override
-    public void setUniverse(final IEnvironment universe) {
-        super.setUniverse(universe);
-        for (LearningAgent agent : getAgents()) {
-            agent.setUniverse(universe);
-        }
-    }
-
-    @Override
-    public void setOldState(final IState oldState) {
-        super.setOldState(oldState);
-        for (LearningAgent agent : getAgents()) {
-            agent.setOldState(oldState);
-        }
     }
 
     @Override
@@ -112,37 +57,26 @@ public abstract class LearningAgent extends AbstractAgent {
         return result;
     }
 
-    public void setLevel(final int level) {
-        this.level = level;
-    }
-
     /** Simulates one turn for agent */
     protected abstract int[] tick(final int turnNo, final int[] newTasks) throws Exception;
 
     /** Fires learning process for this machine */
     protected void train() throws Exception {
         if (this.trainSet == null) {
-            this.trainSet = new Instances("TrainSet", getAttributes(), 0);
+            this.trainSet = new Instances("TrainSet", Attributes.attributes, 0);
             this.trainSet.setClassIndex(this.trainSet.numAttributes() - 1);
         }
         getClassifier().buildClassifier(this.trainSet);
-        for (LearningAgent agent : this.agents) {
-            agent.train();
-        }
     }
 
     /** Adds sample to {@link #trainSet} dataset of this agent and all underlying. */
     protected void addTrainData(final Instance instance) {
         if (this.trainSet == null) {
-            this.trainSet = new Instances("TrainSet", getAttributes(), 0);
+            this.trainSet = new Instances("TrainSet", Attributes.attributes, 0);
             this.trainSet.setClassIndex(this.trainSet.numAttributes() - 1);
         }
 
         this.trainSet.add(instance);
-
-        for (LearningAgent agent : getAgents()) {
-            agent.addTrainData(instance);
-        }
     }
 
     /** Returns classifier */
@@ -156,11 +90,7 @@ public abstract class LearningAgent extends AbstractAgent {
 
     /** Return number of product which should be worked on */
     protected int getAction(final Instance instance) throws Exception {
-        if (this.level != Parameters.LEARNING_LEVEL) {
-            return this.level;
-        }
-
-        Instances data = new Instances("Decide", getAttributes(), 0);
+        Instances data = new Instances("Decide", Attributes.attributes, 0);
         data.setClassIndex(data.numAttributes() - 1);
         instance.setDataset(data);
 
