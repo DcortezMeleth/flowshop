@@ -7,6 +7,8 @@ import environment.IAction;
 import environment.IEnvironment;
 import environment.IState;
 import org.apache.commons.math3.distribution.PoissonDistribution;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import pl.edu.agh.flowshop.entity.Action;
 import pl.edu.agh.flowshop.entity.AgentState;
 import pl.edu.agh.flowshop.entity.Order;
@@ -40,6 +42,8 @@ public class Model implements IEnvironment {
 
     public static final int MIN_ORDER_SIZE = 3;
 
+    private final static Logger logger = LogManager.getLogger(Model.class);
+
     /** Model history used for learning */
     private final ModelHistory history;
 
@@ -65,6 +69,9 @@ public class Model implements IEnvironment {
      * @return return queue sizes from each iteration
      */
     public List<Double> run() throws Exception {
+        logger.debug("------------------------------------------");
+        logger.debug("---------- EXPERIMENT - START ------------");
+        logger.debug("------------------------------------------");
         PoissonDistribution random = new PoissonDistribution(3);
         Queue<Order> orders =
                 MinMaxPriorityQueue.orderedBy(new OrderComparator()).maximumSize(Parameters.QUEUE_SIZE).create();
@@ -75,8 +82,11 @@ public class Model implements IEnvironment {
 
         //main loop
         for (int turnNo = 0; turnNo < Parameters.TURN_LIMIT; turnNo++) {
+            logger.debug("Turn: " + turnNo);
+
             //train on collected data
             if (turnNo % Parameters.LEARNING_TURN == 0) {
+                logger.debug("Learning turn!");
                 for (Layer layer : this.layers) {
                     for (Machine machine : layer.getMachines()) {
                         machine.train();
@@ -90,6 +100,7 @@ public class Model implements IEnvironment {
                 orders.offer(order);
                 products = order.getProductsList();
                 newOrderTurn += random.sample();
+                logger.debug("Order generated: " + order.toString());
             } else {
                 products = new int[Parameters.PRODUCT_TYPES_NO];
             }
@@ -110,9 +121,13 @@ public class Model implements IEnvironment {
             }
 
             queueSizes.add(getQueuesSize());
-            System.out.println("Orders size:" + orders.size());
-            System.out.println("Finished orders size:" + finishedOrders.size());
+            logger.debug("Orders size:" + orders.size());
+            logger.debug("Finished orders size:" + finishedOrders.size());
         }
+
+        logger.debug("------------------------------------------");
+        logger.debug("---------- EXPERIMENT - STOP- ------------");
+        logger.debug("------------------------------------------");
 
         return queueSizes;
     }
@@ -267,24 +282,36 @@ public class Model implements IEnvironment {
      */
     private int deliverOrders(final Queue<Order> orders, final int[] finishedProducts) throws Exception {
         int reward = 0;
+        logger.debug("Delivering orders!");
+        logger.debug("Orders queue size: " + orders.size());
+        StringBuilder sb = new StringBuilder("");
+        for (int product : finishedProducts) {
+            sb.append(product).append(",");
+        }
+        logger.debug("Finished products: [" + sb + "]");
         for (int i = 0; i < orders.size(); i++) {
             Order order = orders.element();
-            int[] product = order.getProductsList();
+            int[] products = order.getProductsList();
+
+
             for (int j = 0; j < finishedProducts.length; j++) {
+                logger.debug("Not enough part to finish order: " + order.toString());
                 //not enough product -> we are finished
-                if (product[j] > finishedProducts[j]) {
+                if (products[j] > finishedProducts[j]) {
                     return reward;
                 }
             }
 
             //order finished -> remove from queue
             for (int j = 0; j < finishedProducts.length; j++) {
-                finishedProducts[j] -= product[j];
+                finishedProducts[j] -= products[j];
             }
             finishedOrders.add(orders.poll());
+            logger.debug("Order finished: " + order.toString());
 
             reward += order.getReward() + order.getValue();
             if (order.getDueTime() > 0) {
+                logger.debug("Penalty received");
                 reward -= order.getPenalty();
             }
 
@@ -295,6 +322,8 @@ public class Model implements IEnvironment {
                 }
             }
         }
+
+        logger.debug("Finished orders count: " + finishedOrders.size());
 
         return reward;
     }

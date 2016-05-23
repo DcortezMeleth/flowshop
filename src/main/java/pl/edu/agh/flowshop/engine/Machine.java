@@ -1,5 +1,7 @@
 package pl.edu.agh.flowshop.engine;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import pl.edu.agh.flowshop.utils.Parameters;
 import weka.core.Instance;
 
@@ -14,6 +16,8 @@ import java.util.Random;
  *         Created on 02.02.2016.
  */
 public class Machine extends LearningAgent {
+
+    private final static Logger logger = LogManager.getLogger(Machine.class);
 
     /** Type of processed product */
     private int productType = -1;
@@ -31,6 +35,7 @@ public class Machine extends LearningAgent {
      * <ul>value - processing time</ul>
      * </li>
      */
+    @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
     private Map<Integer, Integer> timeTable = new HashMap<>();
 
     public Machine() {
@@ -55,8 +60,10 @@ public class Machine extends LearningAgent {
 
     @Override
     protected int[] tick(final int turnNo, final int[] newTasks) throws Exception {
+        logger.debug("Machine " + getId() + " tick!");
         int[] processed = new int[Parameters.PRODUCT_TYPES_NO];
         if (shouldMachineBreak()) {
+            logger.debug("Machine " + getId() + " broken!");
             //return processed product to queue
             newTasks[this.productType] += 1;
             this.productType = -1;
@@ -66,6 +73,7 @@ public class Machine extends LearningAgent {
 
         //take task from queue
         if (this.turnsLeft <= 0 && newTasks[this.productType] > 0) {
+            logger.debug("Machine " + getId() + " takes task from queue!");
             newTasks[this.productType] -= 1;
             this.turnsLeft = this.timeTable.get(this.productType + 1);
         }
@@ -74,6 +82,7 @@ public class Machine extends LearningAgent {
 
         //finished product is moved to finishedProduct field
         if (this.turnsLeft <= 0 && this.productType > -1) {
+            logger.debug("Machine " + getId() + " finishes product " + this.productType);
             processed[this.productType] += 1;
         }
 
@@ -89,6 +98,7 @@ public class Machine extends LearningAgent {
     protected void decideOnAction(final Instance instance) throws Exception {
         //changing production type while working is forbidden
         if (this.turnsLeft > 0) {
+            logger.debug("Machine " + getId() + " still working!");
             return;
         }
 
@@ -96,7 +106,10 @@ public class Machine extends LearningAgent {
 
         // zmienilismy typ -> czekamy ture
         if (actionToChoose != this.productType) {
+            logger.debug("Machine " + getId() + " changed to " + actionToChoose);
             this.turnsLeft++;
+        } else {
+            logger.debug("Machine " + getId() + " producing same product.");
         }
 
         this.productType = actionToChoose;

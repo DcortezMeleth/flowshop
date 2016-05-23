@@ -1,5 +1,7 @@
 package pl.edu.agh.flowshop.engine;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import pl.edu.agh.flowshop.utils.Parameters;
 
 import java.util.List;
@@ -11,6 +13,8 @@ import java.util.List;
  *         Created on 2016-03-09.
  */
 public class Layer {
+
+    private final static Logger logger = LogManager.getLogger(Layer.class);
 
     /** layers counter */
     private static int count = 0;
@@ -60,11 +64,13 @@ public class Layer {
     }
 
     public int[] tick(final int turnNo, final int[] newTasks) throws Exception {
+        logger.debug("Layer " + id + " tick!");
         //add new tasks to queue
         addArrayElements(this.tasksQueue, newTasks);
 
         //chance for changing processing product type
         for (Machine machine : this.machines) {
+            logger.debug("Layer " + id + " decision time.");
             machine.decideOnAction(model.prepareInstanceForDecision());
         }
 
@@ -74,6 +80,12 @@ public class Layer {
             addArrayElements(finishedProducts, machine.tick(turnNo, this.tasksQueue));
         }
 
+
+        StringBuilder sb = new StringBuilder("");
+        for (int product : finishedProducts) {
+            sb.append(product).append(",");
+        }
+        logger.debug("Finished products for layer " + id + ": [" + sb + "]");
         return finishedProducts;
     }
 

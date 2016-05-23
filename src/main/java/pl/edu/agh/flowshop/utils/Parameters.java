@@ -55,9 +55,6 @@ public abstract class Parameters {
     /** Key for product types no. value in properties file. */
     private static final String PRODUCT_PRICE_KEY = "PRODUCT_PRICE_";
 
-    /** Key for learning layer in properties file. */
-    private static final String LEARNING_LEVEL_KEY = "LEARNING_LEVEL";
-
     /** Reward for completion od order */
     private static final String REWARD_KEY = "REWARD";
 
@@ -92,6 +89,9 @@ public abstract class Parameters {
         }
     }
 
+    private Parameters() {
+    }
+
     /** Reads configuration from file */
     private static void getConfig(final Properties properties) {
         try {
@@ -99,9 +99,6 @@ public abstract class Parameters {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    private Parameters() {
     }
 
 }

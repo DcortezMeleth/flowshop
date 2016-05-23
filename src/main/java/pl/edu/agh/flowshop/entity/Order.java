@@ -33,6 +33,16 @@ public class Order {
         this.priority = priority;
     }
 
+    @Override
+    public String toString() {
+        StringBuilder products = new StringBuilder("");
+        for (int product : productsList) {
+            products.append(product).append(",");
+        }
+        return "Order -> products: [" + products + "] reward: " + reward + " penalty: " + penalty + " priority: "
+                + priority + " dueTime: " + dueTime;
+    }
+
     /** Counts and returns value of order */
     public int getValue() {
         int result = 0;
