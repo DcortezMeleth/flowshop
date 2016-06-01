@@ -16,14 +16,10 @@ public class Experiment {
 
     public static void main(String[] args) {
         try {
-            GraphPanel graph;
-            //SwingUtilities.invokeLater(new Runnable() {
-            //    public void run() {
-            graph = createAndShowGui();
-            //    }
-            //});
             Model model = ConfigReader.createModel();
             List<Double> results = model.run();
+            GraphPanel graph;
+            graph = createAndShowGui();
             graph.setScores(results);
         } catch (Exception e) {
             e.printStackTrace();

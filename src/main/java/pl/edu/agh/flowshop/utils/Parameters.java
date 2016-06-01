@@ -84,7 +84,7 @@ public abstract class Parameters {
         USED_HISTORY = Integer.parseInt(configuration.getProperty(USED_HISTORY_KEY));
 
         COSTS = new HashMap<>();
-        for (int i = 0; i < PRODUCT_TYPES_NO; i++) {
+        for (int i = 1; i <= PRODUCT_TYPES_NO; i++) {
             COSTS.put(i, Integer.valueOf(configuration.getProperty(PRODUCT_PRICE_KEY + i)));
         }
     }

@@ -23,7 +23,7 @@ public class Machine extends LearningAgent {
     private int productType = -1;
 
     /** Turns left for product to be processed */
-    private int turnsLeft;
+    private int turnsLeft = 0;
 
     /** Indicates if machine is broken */
     private boolean broken = false;
@@ -65,8 +65,10 @@ public class Machine extends LearningAgent {
         if (shouldMachineBreak()) {
             logger.debug("Machine " + getId() + " broken!");
             //return processed product to queue
-            newTasks[this.productType] += 1;
-            this.productType = -1;
+            if(this.productType != 0) {
+                newTasks[this.productType] += 1;
+            }
+            this.productType = 0;
             this.turnsLeft = 1;
             return processed;
         }
@@ -74,16 +76,18 @@ public class Machine extends LearningAgent {
         //take task from queue
         if (this.turnsLeft <= 0 && newTasks[this.productType] > 0) {
             logger.debug("Machine " + getId() + " takes task from queue!");
-            newTasks[this.productType] -= 1;
-            this.turnsLeft = this.timeTable.get(this.productType + 1);
+            if(newTasks[this.productType] > 0) {
+                newTasks[this.productType] -= 1;
+                this.turnsLeft = this.timeTable.get(this.productType + 1);
+            }
         }
 
         this.turnsLeft--;
 
         //finished product is moved to finishedProduct field
-        if (this.turnsLeft <= 0 && this.productType > -1) {
+        if (this.turnsLeft <= 0 && this.productType > 0) {
             logger.debug("Machine " + getId() + " finishes product " + this.productType);
-            processed[this.productType] += 1;
+            processed[this.productType-1] += 1;
         }
 
         return processed;
@@ -126,7 +130,7 @@ public class Machine extends LearningAgent {
         }
 
         //check if machine should break
-        return (this.broken = new Random().nextInt(100) > 5);
+        return (this.broken = new Random().nextInt(100) < 5);
     }
 
 }

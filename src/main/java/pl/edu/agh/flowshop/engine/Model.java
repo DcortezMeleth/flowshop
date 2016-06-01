@@ -1,7 +1,6 @@
 package pl.edu.agh.flowshop.engine;
 
 import com.google.common.collect.EvictingQueue;
-import com.google.common.collect.MinMaxPriorityQueue;
 import environment.ActionList;
 import environment.IAction;
 import environment.IEnvironment;
@@ -13,16 +12,12 @@ import pl.edu.agh.flowshop.entity.Action;
 import pl.edu.agh.flowshop.entity.AgentState;
 import pl.edu.agh.flowshop.entity.Order;
 import pl.edu.agh.flowshop.utils.Attributes;
-import pl.edu.agh.flowshop.utils.OrderComparator;
 import pl.edu.agh.flowshop.utils.Parameters;
 import weka.core.Attribute;
 import weka.core.Instance;
 import weka.core.SparseInstance;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Queue;
-import java.util.Random;
+import java.util.*;
 
 /**
  * Represents whole model in experiment.
@@ -73,8 +68,7 @@ public class Model implements IEnvironment {
         logger.debug("---------- EXPERIMENT - START ------------");
         logger.debug("------------------------------------------");
         PoissonDistribution random = new PoissonDistribution(3);
-        Queue<Order> orders =
-                MinMaxPriorityQueue.orderedBy(new OrderComparator()).maximumSize(Parameters.QUEUE_SIZE).create();
+        Queue<Order> orders = new LinkedList<>();
         Order order;
         int[] products;
         int newOrderTurn = random.sample();
