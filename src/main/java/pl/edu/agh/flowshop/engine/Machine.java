@@ -58,39 +58,38 @@ public class Machine extends LearningAgent {
         return -1;
     }
 
-    @Override
-    protected int[] tick(final int turnNo, final int[] newTasks) throws Exception {
+    /** Simulates one turn for agent */
+    protected int tick(final int[] newTasks) throws Exception {
         logger.debug("Machine " + getId() + " tick!");
-        int[] processed = new int[Parameters.PRODUCT_TYPES_NO];
         if (shouldMachineBreak()) {
             logger.debug("Machine " + getId() + " broken!");
             //return processed product to queue
             if(this.productType != 0) {
                 newTasks[this.productType] += 1;
             }
-            this.productType = 0;
+            this.productType = -1;
             this.turnsLeft = 1;
-            return processed;
+            return -1;
         }
 
         //take task from queue
-        if (this.turnsLeft <= 0 && newTasks[this.productType] > 0) {
-            logger.debug("Machine " + getId() + " takes task from queue!");
-            if(newTasks[this.productType] > 0) {
+        if(this.productType > -1) {
+            if (this.turnsLeft <= 0 && newTasks[this.productType] > 0) {
+                logger.debug("Machine " + getId() + " takes task from queue!");
                 newTasks[this.productType] -= 1;
-                this.turnsLeft = this.timeTable.get(this.productType + 1);
+                this.turnsLeft = this.timeTable.get(this.productType);
+            }
+
+            this.turnsLeft--;
+
+            //finished product is moved to finishedProduct field
+            if (this.turnsLeft <= 0) {
+                logger.debug("Machine " + getId() + " finishes product " + this.productType);
+                return this.productType;
             }
         }
 
-        this.turnsLeft--;
-
-        //finished product is moved to finishedProduct field
-        if (this.turnsLeft <= 0 && this.productType > 0) {
-            logger.debug("Machine " + getId() + " finishes product " + this.productType);
-            processed[this.productType-1] += 1;
-        }
-
-        return processed;
+        return -1;
     }
 
     /**
@@ -119,11 +118,7 @@ public class Machine extends LearningAgent {
         this.productType = actionToChoose;
     }
 
-    /**
-     * Checks if machine should break this turn
-     *
-     * @return product type which machine was working on, -1 if it was idle
-     */
+    /** Checks if machine should break this turn */
     private boolean shouldMachineBreak() {
         if (this.broken || this.turnsLeft <= 0 || this.productType < 0) {
             return false;

@@ -50,6 +50,10 @@ public class Layer {
         return this.tasksQueue[productType];
     }
 
+    public int[] getTasksQueue() {
+        return tasksQueue;
+    }
+
     /** Returns summed number of products in queue */
     public int getQueueSize() {
         int result = 0;
@@ -57,16 +61,19 @@ public class Layer {
             result += tasksQueue[i];
         }
         return result;
+
     }
 
     public List<Machine> getMachines() {
         return machines;
     }
 
-    public int[] tick(final int turnNo, final int[] newTasks) throws Exception {
+    public int[] tick(final int[] newTasks) throws Exception {
         logger.debug("Layer " + id + " tick!");
         //add new tasks to queue
-        addArrayElements(this.tasksQueue, newTasks);
+        for (int i = 0; i < Parameters.PRODUCT_TYPES_NO; i++) {
+            this.tasksQueue[i] += newTasks[i];
+        }
 
         //chance for changing processing product type
         for (Machine machine : this.machines) {
@@ -77,7 +84,10 @@ public class Layer {
         //tick for machines
         int[] finishedProducts = new int[Parameters.PRODUCT_TYPES_NO];
         for (Machine machine : this.machines) {
-            addArrayElements(finishedProducts, machine.tick(turnNo, this.tasksQueue));
+            int result = machine.tick(this.tasksQueue);
+            if(result > -1) {
+                finishedProducts[result] += 1;
+            }
         }
 
 
@@ -89,10 +99,4 @@ public class Layer {
         return finishedProducts;
     }
 
-    /** Adds products from list2 to list1 */
-    private void addArrayElements(final int[] list1, final int[] list2) {
-        for (int i = 0; i < Parameters.PRODUCT_TYPES_NO; i++) {
-            list1[i] += list2[i];
-        }
-    }
 }

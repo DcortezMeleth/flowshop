@@ -57,9 +57,6 @@ public abstract class LearningAgent extends AbstractAgent {
         return result;
     }
 
-    /** Simulates one turn for agent */
-    protected abstract int[] tick(final int turnNo, final int[] newTasks) throws Exception;
-
     /** Fires learning process for this machine */
     protected void train() throws Exception {
         if (this.trainSet == null) {
@@ -99,7 +96,6 @@ public abstract class LearningAgent extends AbstractAgent {
             double[] probabilities = getClassifier().distributionForInstance(instance);
             return chooseActionFromProbabilities(probabilities);
         } else {
-
             Action action = (Action) act();
             return action.getProductToProcess();
         }

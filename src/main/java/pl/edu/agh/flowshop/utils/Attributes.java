@@ -48,9 +48,10 @@ public abstract class Attributes {
             }
         }
 
-        FastVector result = new FastVector(2);
-        result.addElement("GOOD");
-        result.addElement("BAD");
+        FastVector result = new FastVector(3);
+        result.addElement("0");
+        result.addElement("1");
+        result.addElement("2");
         attr_vec.addElement(new Attribute("result", result));
 
         attributes = attr_vec;
