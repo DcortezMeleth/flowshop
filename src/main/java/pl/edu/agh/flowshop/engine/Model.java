@@ -167,7 +167,7 @@ public class Model implements IEnvironment {
             Attribute attr = (Attribute) Attributes.attributes.elementAt(i);
             String attrName = attr.name();
             if (attrName.contains(Attributes.BUFFER_PREFIX)) {
-                int productNo = Character.getNumericValue(attrName.charAt(attrName.length()));
+                int productNo = Character.getNumericValue(attrName.charAt(attrName.length()-1));
                 buffersBefore[productNo] += ((AgentState) iState).getAttrValues().get(i);
                 buffersAfter[productNo] += ((AgentState) iState1).getAttrValues().get(i);
             }
