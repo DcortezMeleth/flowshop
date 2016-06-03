@@ -2,7 +2,6 @@ package pl.edu.agh.flowshop.engine;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import pl.edu.agh.flowshop.utils.Parameters;
 import weka.core.Instance;
 
 import java.util.HashMap;

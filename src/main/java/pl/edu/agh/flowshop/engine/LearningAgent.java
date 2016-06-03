@@ -1,8 +1,14 @@
 package pl.edu.agh.flowshop.engine;
 
 import agents.AbstractAgent;
+import algorithms.IStrategy;
+import algorithms.PengSelector;
+import algorithms.QLearningSelector;
+import algorithms.WatkinsSelector;
 import environment.ActionList;
+import environment.IState;
 import pl.edu.agh.flowshop.entity.Action;
+import pl.edu.agh.flowshop.entity.AgentState;
 import pl.edu.agh.flowshop.utils.Attributes;
 import pl.edu.agh.flowshop.utils.Parameters;
 import weka.classifiers.Classifier;
@@ -13,6 +19,8 @@ import weka.classifiers.trees.J48;
 import weka.core.Instance;
 import weka.core.Instances;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -38,6 +46,12 @@ public abstract class LearningAgent extends AbstractAgent {
     /** Classifier used for machine to learn */
     private Classifier classifier;
 
+    /** Is classifier already initialized */
+    private boolean initialized;
+
+    /** True if using supervised learning, false if using reinforcement learning */
+    private boolean supervised;
+
     public LearningAgent() {
         super(null, null);
         this.id = counter++;
@@ -59,30 +73,25 @@ public abstract class LearningAgent extends AbstractAgent {
 
     /** Fires learning process for this machine */
     protected void train() throws Exception {
-        if (this.trainSet == null) {
-            this.trainSet = new Instances("TrainSet", Attributes.attributes, 0);
-            this.trainSet.setClassIndex(this.trainSet.numAttributes() - 1);
+        if(supervised) {
+            if (this.trainSet == null) {
+                this.trainSet = new Instances("TrainSet", Attributes.attributes, 0);
+                this.trainSet.setClassIndex(this.trainSet.numAttributes() - 1);
+            }
+            this.classifier.buildClassifier(this.trainSet);
         }
-        getClassifier().buildClassifier(this.trainSet);
     }
 
     /** Adds sample to {@link #trainSet} dataset of this agent and all underlying. */
     protected void addTrainData(final Instance instance) {
-        if (this.trainSet == null) {
-            this.trainSet = new Instances("TrainSet", Attributes.attributes, 0);
-            this.trainSet.setClassIndex(this.trainSet.numAttributes() - 1);
+        if(supervised) {
+            if (this.trainSet == null) {
+                this.trainSet = new Instances("TrainSet", Attributes.attributes, 0);
+                this.trainSet.setClassIndex(this.trainSet.numAttributes() - 1);
+            }
+
+            this.trainSet.add(instance);
         }
-
-        this.trainSet.add(instance);
-    }
-
-    /** Returns classifier */
-    protected Classifier getClassifier() {
-        if (this.classifier == null) {
-            assignClassifier();
-        }
-
-        return this.classifier;
     }
 
     /** Return number of product which should be worked on */
@@ -92,8 +101,8 @@ public abstract class LearningAgent extends AbstractAgent {
         instance.setDataset(data);
 
         //if classifier != null we use weka for decisions
-        if (getClassifier() != null) {
-            double[] probabilities = getClassifier().distributionForInstance(instance);
+        if(supervised) {
+            double[] probabilities = this.classifier.distributionForInstance(instance);
             return chooseActionFromProbabilities(probabilities);
         } else {
             Action action = (Action) act();
@@ -102,7 +111,7 @@ public abstract class LearningAgent extends AbstractAgent {
     }
 
     /** Assigns classifier based on its name from config */
-    private void assignClassifier() {
+    public void init(final Model model) {
         switch (this.classifierName) {
             case "J48":
                 this.classifier = new J48();
@@ -116,10 +125,42 @@ public abstract class LearningAgent extends AbstractAgent {
             case "NaiveBayes":
                 this.classifier = new NaiveBayes();
                 break;
+            case "QLearning":
+                this.setAlgorithm(new QLearningSelector());
+                break;
+            case "Watkins":
+                this.setAlgorithm(new WatkinsSelector(Parameters.LAMBDA));
+                break;
+            case "Peng":
+                this.setAlgorithm(new PengSelector(Parameters.LAMBDA));
+                break;
             default:
                 this.classifier = new J48();
                 break;
         }
+
+        // initialization of reinforcement learning params
+        if(getAlgorithm() != null) {
+            QLearningSelector strategy = (QLearningSelector) getAlgorithm();
+            strategy.setEpsilon(Parameters.EPSILON);
+            strategy.setGamma(Parameters.GAMMA);
+            this.supervised = false;
+
+            setUniverse(model);
+            setCurrentState(getInitState(model));
+        }
+
+        this.initialized = true;
+    }
+
+    private IState getInitState(final Model model) {
+        AgentState state = new AgentState(model);
+        List<Integer> attrs = new ArrayList<>();
+        for(int i=0; i<Attributes.size(); i++) {
+            attrs.add(0);
+        }
+        state.setAttrValues(attrs);
+        return state;
     }
 
     /** Chooses action based on their probabilities */

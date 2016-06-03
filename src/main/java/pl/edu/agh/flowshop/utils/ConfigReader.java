@@ -28,16 +28,26 @@ public class ConfigReader {
     /** Creates model based on config files */
     public static Model createModel() {
         List<List<Machine>> machinesConf = getMachinesConfig();
-
         List<Layer> layers = new ArrayList<>();
+        Model model = new Model(layers);
+
         for (List<Machine> machines : machinesConf) {
             layers.add(new Layer(machines));
         }
 
-        Model model = new Model(layers);
         for (Layer layer : layers) {
             layer.setModel(model);
         }
+
+        /** Init attributes */
+        Attributes.initAttributes(model);
+
+        for (Layer layer: layers) {
+            for(Machine machine : layer.getMachines()) {
+                machine.init(model);
+            }
+        }
+
         return model;
     }
 

@@ -7,7 +7,7 @@
         "2": 5,
         "0": 2
       },
-      "classifierName": "J48"
+      "classifierName": "Watkins"
     },
     {
       "id": 2,
@@ -16,7 +16,7 @@
         "2": 5,
         "0": 2
       },
-      "classifierName": "J48"
+      "classifierName": "Watkins"
     }
   ],
   [
@@ -27,7 +27,7 @@
         "2": 5,
         "0": 2
       },
-      "classifierName": "J48"
+      "classifierName": "Watkins"
     },
     {
       "id": 6,
@@ -36,7 +36,7 @@
         "2": 5,
         "0": 2
       },
-      "classifierName": "J48"
+      "classifierName": "Watkins"
     }
   ]
 ]

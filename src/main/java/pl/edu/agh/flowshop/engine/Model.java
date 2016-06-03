@@ -53,9 +53,6 @@ public class Model implements IEnvironment {
     public Model(final List<Layer> layers) {
         this.history = new ModelHistory();
         this.layers = layers;
-
-        /** Init attributes */
-        Attributes.initAttributes(this);
     }
 
     /**
