@@ -152,8 +152,9 @@ public class Model implements IEnvironment {
         Action action = (Action) iAction;
 
         AgentState result = new AgentState(this);
-        result.setAttrValues(getAttributesValues(true, state.getAttrValues(), action.getAgentNo(),
-                action.getProductToProcess()));
+        List<Integer> currentAttrValues = getAttributesValues(true, state.getAttrValues(), action.getAgentNo(),
+                action.getProductToProcess());
+        result.setAttrValues(currentAttrValues);
 
         return result;
     }
@@ -163,7 +164,7 @@ public class Model implements IEnvironment {
         int[] buffersBefore = new int[Parameters.PRODUCT_TYPES_NO];
         int[] buffersAfter = new int[Parameters.PRODUCT_TYPES_NO];
 
-        for (int i = 0; i < Attributes.size(); i++) {
+        for (int i = 0; i < Attributes.size()-1; i++) {
             Attribute attr = (Attribute) Attributes.attributes.elementAt(i);
             String attrName = attr.name();
             if (attrName.contains(Attributes.BUFFER_PREFIX)) {

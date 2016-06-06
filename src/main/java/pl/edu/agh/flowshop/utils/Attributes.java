@@ -30,23 +30,23 @@ public abstract class Attributes {
         for (Layer layer : model.getLayers()) {
             attrNo += layer.getMachines().size();
         }
-        attrNo *= Parameters.USED_HISTORY;
+        //attrNo *= Parameters.USED_HISTORY;
         attrNo++;
 
         // attributes initialization, for now same for all learning layers
         FastVector attr_vec = new FastVector(attrNo);
-        for (int i = 0; i < Parameters.USED_HISTORY; i++) {
+        //for (int i = 0; i < Parameters.USED_HISTORY; i++) {
             for (Layer layer : model.getLayers()) {
                 for (Machine machine : layer.getMachines()) {
-                    Attribute health = new Attribute(i + " " + HEALTH_PREFIX + machine.getId());
+                    Attribute health = new Attribute(HEALTH_PREFIX + machine.getId());
                     attr_vec.addElement(health);
                 }
-                for (int j = 1; j <= Parameters.PRODUCT_TYPES_NO; j++) {
-                    Attribute buffer = new Attribute(i + " " + BUFFER_PREFIX + layer.getId() + "_" + j);
+                for (int j = 0; j < Parameters.PRODUCT_TYPES_NO; j++) {
+                    Attribute buffer = new Attribute(BUFFER_PREFIX + layer.getId() + "_" + j);
                     attr_vec.addElement(buffer);
                 }
             }
-        }
+        //}
 
         FastVector result = new FastVector(3);
         result.addElement("0");

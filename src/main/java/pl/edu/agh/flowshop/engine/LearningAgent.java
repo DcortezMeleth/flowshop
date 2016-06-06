@@ -50,7 +50,7 @@ public abstract class LearningAgent extends AbstractAgent {
     private boolean initialized;
 
     /** True if using supervised learning, false if using reinforcement learning */
-    private boolean supervised;
+    private boolean supervised = true;
 
     public LearningAgent() {
         super(null, null);
