@@ -1,13 +1,10 @@
 package pl.edu.agh.flowshop.entity;
 
 import environment.AbstractState;
-import environment.ActionList;
 import environment.IEnvironment;
 import environment.IState;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.Arrays;
 
 /**
  * Agent state.
@@ -17,24 +14,19 @@ import java.util.Objects;
  */
 public class AgentState extends AbstractState {
 
-    private List<Integer> attrValues;
+    private int[] productsInBuffers;
+
+    private boolean[] machinesHealth;
 
     public AgentState(final IEnvironment ct) {
         super(ct);
     }
 
-    public List<Integer> getAttrValues() {
-        return attrValues;
-    }
-
-    public void setAttrValues(final List<Integer> attrValues) {
-        this.attrValues = attrValues;
-    }
-
     @Override
     public IState copy() {
         AgentState copy = new AgentState(getEnvironment());
-        copy.attrValues = new ArrayList<>(this.attrValues);
+        copy.machinesHealth = Arrays.copyOf(this.machinesHealth, this.machinesHealth.length);
+        copy.productsInBuffers = Arrays.copyOf(this.productsInBuffers, this.productsInBuffers.length);
         return copy;
     }
 
@@ -44,20 +36,14 @@ public class AgentState extends AbstractState {
             return false;
         }
 
-        for(int i=0; i<attrValues.size(); i++) {
-            Integer val1 = this.attrValues.get(i);
-            Integer val2 = ((AgentState) obj).getAttrValues().get(i);
-            if(!val1.equals(val2)) {
-                return false;
-            }
-        }
-
-        return true;
+        AgentState state = (AgentState) obj;
+        return Arrays.equals(this.productsInBuffers, state.productsInBuffers) &&
+                Arrays.equals(this.machinesHealth, state.machinesHealth);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(attrValues);
+        return Arrays.hashCode(this.productsInBuffers) + Arrays.hashCode(this.machinesHealth);
     }
 
     @Override
@@ -68,5 +54,21 @@ public class AgentState extends AbstractState {
     @Override
     public double[] nnCoding() {
         return new double[0];
+    }
+
+    public int[] getProductsInBuffers() {
+        return productsInBuffers;
+    }
+
+    public boolean[] getMachinesHealth() {
+        return machinesHealth;
+    }
+
+    public void setProductsInBuffers(final int[] productsInBuffers) {
+        this.productsInBuffers = productsInBuffers;
+    }
+
+    public void setMachinesHealth(final boolean[] machinesHealth) {
+        this.machinesHealth = machinesHealth;
     }
 }

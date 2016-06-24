@@ -23,7 +23,7 @@ public class Layer {
     private final int id;
 
     /** Tasks queue */
-    private int[] tasksQueue;
+    private int[] buffer;
 
     /** Model to whom layer belongs */
     private Model model;
@@ -32,9 +32,9 @@ public class Layer {
     private List<Machine> machines;
 
     public Layer(final List<Machine> machines) {
-        this.tasksQueue = new int[Parameters.PRODUCT_TYPES_NO];
+        this.buffer = new int[Parameters.PRODUCT_TYPES_NO];
         this.machines = machines;
-        this.id = ++count;
+        this.id = count++;
     }
 
     public void setModel(final Model model) {
@@ -47,18 +47,18 @@ public class Layer {
 
     /** Returns quantity of product type in buffer */
     public int getQuantityInBuffer(final int productType) {
-        return this.tasksQueue[productType];
+        return this.buffer[productType];
     }
 
-    public int[] getTasksQueue() {
-        return tasksQueue;
+    public int[] getBuffer() {
+        return buffer;
     }
 
     /** Returns summed number of products in queue */
     public int getQueueSize() {
         int result = 0;
         for (int i = 0; i < Parameters.PRODUCT_TYPES_NO; i++) {
-            result += tasksQueue[i];
+            result += buffer[i];
         }
         return result;
 
@@ -70,21 +70,21 @@ public class Layer {
 
     public int[] tick(final int[] newTasks) throws Exception {
         logger.debug("Layer " + id + " tick!");
-        //add new tasks to queue
+        //add new tasks to buffer
         for (int i = 0; i < Parameters.PRODUCT_TYPES_NO; i++) {
-            this.tasksQueue[i] += newTasks[i];
+            this.buffer[i] += newTasks[i];
         }
 
         //chance for changing processing product type
         for (Machine machine : this.machines) {
             logger.debug("Layer " + id + " decision time.");
-            machine.decideOnAction(model.prepareInstanceForDecision());
+            machine.decideOnAction();
         }
 
         //tick for machines
         int[] finishedProducts = new int[Parameters.PRODUCT_TYPES_NO];
         for (Machine machine : this.machines) {
-            int result = machine.tick(this.tasksQueue);
+            int result = machine.tick(this.buffer);
             if(result > -1) {
                 finishedProducts[result] += 1;
             }

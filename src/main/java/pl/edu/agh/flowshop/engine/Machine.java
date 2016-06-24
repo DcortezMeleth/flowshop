@@ -1,12 +1,19 @@
 package pl.edu.agh.flowshop.engine;
 
+import agents.AbstractAgent;
+import algorithms.PengSelector;
+import algorithms.QLearningSelector;
+import algorithms.WatkinsSelector;
+import environment.ActionList;
+import environment.IState;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import weka.core.Instance;
+import pl.edu.agh.flowshop.entity.Action;
+import pl.edu.agh.flowshop.entity.AgentState;
+import pl.edu.agh.flowshop.utils.Attributes;
+import pl.edu.agh.flowshop.utils.Parameters;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 /**
  * Machine processing tasks
@@ -14,9 +21,18 @@ import java.util.Random;
  * @author Bartosz Sądel
  *         Created on 02.02.2016.
  */
-public class Machine extends LearningAgent {
+public class Machine extends AbstractAgent {
 
     private final static Logger logger = LogManager.getLogger(Machine.class);
+
+    /** Agents counter */
+    private static int counter = 0;
+
+    /** Agent id */
+    private final int id;
+
+    /** Classifier name */
+    protected String classifierName = "";
 
     /** Type of processed product */
     private int productType = -1;
@@ -38,7 +54,8 @@ public class Machine extends LearningAgent {
     private Map<Integer, Integer> timeTable = new HashMap<>();
 
     public Machine() {
-        super();
+        super(null, null);
+        this.id = counter++;
     }
 
     public boolean isBroken() {
@@ -57,13 +74,41 @@ public class Machine extends LearningAgent {
         return -1;
     }
 
+    /** Assigns classifier based on its name from config */
+    public void init(final Model model) {
+        switch (this.classifierName) {
+            case "QLearning":
+                this.setAlgorithm(new QLearningSelector());
+                break;
+            case "Watkins":
+                this.setAlgorithm(new WatkinsSelector(Parameters.LAMBDA));
+                break;
+            case "Peng":
+            default:
+                this.setAlgorithm(new PengSelector(Parameters.LAMBDA));
+                break;
+        }
+
+        // initialization of reinforcement learning params
+        QLearningSelector strategy = (QLearningSelector) getAlgorithm();
+        strategy.setEpsilon(Parameters.EPSILON);
+        strategy.setGamma(Parameters.GAMMA);
+
+        setUniverse(model);
+        setCurrentState(getInitState(model));
+    }
+
+    public int getId() {
+        return this.id;
+    }
+
     /** Simulates one turn for agent */
     protected int tick(final int[] newTasks) throws Exception {
         logger.debug("Machine " + getId() + " tick!");
         if (shouldMachineBreak()) {
             logger.debug("Machine " + getId() + " broken!");
             //return processed product to queue
-            if(this.productType != 0) {
+            if (this.productType != 0) {
                 newTasks[this.productType] += 1;
             }
             this.productType = -1;
@@ -72,7 +117,7 @@ public class Machine extends LearningAgent {
         }
 
         //take task from queue
-        if(this.productType > -1) {
+        if (this.productType > -1) {
             if (this.turnsLeft <= 0 && newTasks[this.productType] > 0) {
                 logger.debug("Machine " + getId() + " takes task from queue!");
                 newTasks[this.productType] -= 1;
@@ -92,19 +137,20 @@ public class Machine extends LearningAgent {
     }
 
     /**
-     * Classifies given example based on {@link #classifier} decision.
+     * Classifies given example based on learning algorithm decision.
      *
-     * @param instance instance to decide on
      * @throws Exception
      */
-    protected void decideOnAction(final Instance instance) throws Exception {
+    protected void decideOnAction() throws Exception {
         //changing production type while working is forbidden
         if (this.turnsLeft > 0) {
             logger.debug("Machine " + getId() + " still working!");
             return;
         }
 
-        int actionToChoose = getAction(instance);
+
+        Action action = (Action) act();
+        int actionToChoose = action.getProductToProcess();
 
         // zmienilismy typ -> czekamy ture
         if (actionToChoose != this.productType) {
@@ -117,6 +163,16 @@ public class Machine extends LearningAgent {
         this.productType = actionToChoose;
     }
 
+    @Override
+    protected ActionList getActionList() {
+        ActionList result = new ActionList(getCurrentState());
+        for (int productNo = 0; productNo < Parameters.PRODUCT_TYPES_NO; productNo++) {
+            result.add(new Action(id, productNo));
+        }
+
+        return result;
+    }
+
     /** Checks if machine should break this turn */
     private boolean shouldMachineBreak() {
         if (this.broken || this.turnsLeft <= 0 || this.productType < 0) {
@@ -125,6 +181,21 @@ public class Machine extends LearningAgent {
 
         //check if machine should break
         return (this.broken = new Random().nextInt(100) < 5);
+    }
+
+    private IState getInitState(final Model model) {
+        AgentState state = new AgentState(model);
+        int machinesNo=0;
+        for(Layer layer : model.getLayers()) {
+            machinesNo += layer.getMachines().size();
+        }
+        boolean[] health = new boolean[machinesNo];
+        for(int i=0; i<health.length; i++) {
+            health[i] = true;
+        }
+        state.setMachinesHealth(health);
+        state.setProductsInBuffers(new int[model.getLayers().size() * Parameters.PRODUCT_TYPES_NO]);
+        return state;
     }
 
 }

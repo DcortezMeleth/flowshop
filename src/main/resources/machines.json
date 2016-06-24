@@ -3,40 +3,40 @@
     {
       "id": 1,
       "timeTable": {
+        "0": 2,
         "1": 3,
-        "2": 5,
-        "0": 2
+        "2": 5
       },
-      "classifierName": "Watkins"
+      "classifierName": "QLearning"
     },
     {
       "id": 2,
       "timeTable": {
+        "0": 2,
         "1": 3,
-        "2": 5,
-        "0": 2
+        "2": 5
       },
-      "classifierName": "Watkins"
+      "classifierName": "QLearning"
     }
   ],
   [
     {
-      "id": 5,
+      "id": 3,
       "timeTable": {
+        "0": 2,
         "1": 3,
-        "2": 5,
-        "0": 2
+        "2": 5
       },
-      "classifierName": "Watkins"
+      "classifierName": "QLearning"
     },
     {
-      "id": 6,
+      "id": 4,
       "timeTable": {
+        "0": 2,
         "1": 3,
-        "2": 5,
-        "0": 2
+        "2": 5
       },
-      "classifierName": "Watkins"
+      "classifierName": "QLearning"
     }
   ]
 ]
