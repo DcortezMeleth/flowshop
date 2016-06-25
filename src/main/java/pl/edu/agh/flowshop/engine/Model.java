@@ -86,9 +86,7 @@ public class Model implements IEnvironment {
             //remove finished orders
             deliverOrders(orders, this.finishedProducts);
 
-            for (Order order1 : orders) {
-                order1.decreaseDueTime();
-            }
+            orders.forEach(Order::decreaseDueTime);
 
             queueSizes.add(getQueuesSize(turnNo));
             logger.debug("Orders size:" + orders.size());
@@ -120,17 +118,35 @@ public class Model implements IEnvironment {
 
     @Override
     public IState successorState(final IState iState, final IAction iAction) {
-        AgentState state = (AgentState) iState;
+        AgentState agentState = (AgentState) iState;
         Action action = (Action) iAction;
 
-        AgentState result = (AgentState) state.copy();
+        int[] buffers = new int[agentState.getProductsInBuffers().length];
+        boolean[] health = new boolean[agentState.getMachinesHealth().length];
+
+        int i = 0;
+        int j = 0;
+        int targetLayer = 0;
+        for (Layer layer : this.layers) {
+            for (Machine machine : layer.getMachines()) {
+                if(machine.getId() == action.getAgentNo()) {
+                    targetLayer = j;
+                }
+                health[i++] = !machine.isBroken();
+            }
+
+            System.arraycopy(layer.getBuffer(), 0, buffers, j * Parameters.PRODUCT_TYPES_NO, layer.getBuffer().length);
+            j++;
+        }
+
+        int bufferIdx = targetLayer * Parameters.PRODUCT_TYPES_NO + action.getProductToProcess();
+        buffers[bufferIdx] -= buffers[bufferIdx] > 0 ? 1 : 0;
 
 
-        List<Integer> currentAttrValues = getAttributesValues(true, state.getAttrValues(), action.getAgentNo(),
-                action.getProductToProcess());
-        result.setAttrValues(currentAttrValues);
-
-        return result;
+        AgentState state = new AgentState(this);
+        state.setMachinesHealth(health);
+        state.setProductsInBuffers(buffers);
+        return state;
     }
 
     @Override
@@ -189,7 +205,7 @@ public class Model implements IEnvironment {
             sb.append(product).append(",");
         }
         logger.debug("Finished products: [" + sb + "]");
-        for(Iterator<Order> it = orders.iterator(); it.hasNext();) {
+        for (Iterator<Order> it = orders.iterator(); it.hasNext(); ) {
             Order order = it.next();
             int[] demandedProducts = order.getProductsList();
 
@@ -204,7 +220,7 @@ public class Model implements IEnvironment {
                     completed = false;
                 }
             }
-            if(!completed) {
+            if (!completed) {
                 // not completed order -> proceed to next one
                 continue;
             }
@@ -212,7 +228,7 @@ public class Model implements IEnvironment {
             //order finished -> remove from queue
             for (int j = 0; j < finishedProducts.length; j++) {
                 finishedProducts[j] -= demandedProducts[j];
-                if(finishedProducts[j] < 0) {
+                if (finishedProducts[j] < 0) {
                     throw new Exception("Negative finished products: " + finishedProducts[j]);
                 }
             }

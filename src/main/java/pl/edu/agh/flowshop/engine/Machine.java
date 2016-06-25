@@ -10,7 +10,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import pl.edu.agh.flowshop.entity.Action;
 import pl.edu.agh.flowshop.entity.AgentState;
-import pl.edu.agh.flowshop.utils.Attributes;
 import pl.edu.agh.flowshop.utils.Parameters;
 
 import java.util.*;
@@ -64,14 +63,6 @@ public class Machine extends AbstractAgent {
 
     public boolean isWorking() {
         return this.turnsLeft > 0 && !this.broken;
-    }
-
-    /** Returns product machine is going to finish in next turn. -1 if it won't finish anyting */
-    public int getProductToBeProcessed() {
-        if (this.turnsLeft <= 1 && this.productType > -1) {
-            return this.productType;
-        }
-        return -1;
     }
 
     /** Assigns classifier based on its name from config */

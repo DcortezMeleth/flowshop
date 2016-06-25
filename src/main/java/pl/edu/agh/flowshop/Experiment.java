@@ -27,7 +27,7 @@ public class Experiment {
     }
 
     private static GraphPanel createAndShowGui() {
-        GraphPanel mainPanel = new GraphPanel(new ArrayList<Double>());
+        GraphPanel mainPanel = new GraphPanel(new ArrayList<>());
         JFrame frame = new JFrame("FlowShop_Graph");
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.getContentPane().add(mainPanel);

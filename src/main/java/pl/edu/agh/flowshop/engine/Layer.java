@@ -25,9 +25,6 @@ public class Layer {
     /** Tasks queue */
     private int[] buffer;
 
-    /** Model to whom layer belongs */
-    private Model model;
-
     /** machines list */
     private List<Machine> machines;
 
@@ -37,17 +34,8 @@ public class Layer {
         this.id = count++;
     }
 
-    public void setModel(final Model model) {
-        this.model = model;
-    }
-
     public int getId() {
         return id;
-    }
-
-    /** Returns quantity of product type in buffer */
-    public int getQuantityInBuffer(final int productType) {
-        return this.buffer[productType];
     }
 
     public int[] getBuffer() {
