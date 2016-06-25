@@ -38,6 +38,8 @@ public class Model implements IEnvironment {
 
     private List<Order> finishedOrders = new ArrayList<>();
 
+    private List<Order> orders;
+
     public Model(final List<Layer> layers) {
         this.layers = layers;
     }
@@ -52,7 +54,7 @@ public class Model implements IEnvironment {
         logger.debug("---------- EXPERIMENT - START ------------");
         logger.debug("------------------------------------------");
         PoissonDistribution random = new PoissonDistribution(3);
-        List<Order> orders = new LinkedList<>();
+        orders = new LinkedList<>();
         Order order;
         int[] products;
         int newOrderTurn = random.sample();
@@ -67,7 +69,7 @@ public class Model implements IEnvironment {
                 order = generateOrder();
                 orders.add(order);
                 products = order.getProductsList();
-                newOrderTurn += random.sample() + 1;
+                newOrderTurn += random.sample() + 3;
                 logger.debug("Order generated: " + order.toString());
             } else {
                 products = new int[Parameters.PRODUCT_TYPES_NO];
@@ -84,7 +86,7 @@ public class Model implements IEnvironment {
             }
 
             //remove finished orders
-            deliverOrders(orders, this.finishedProducts);
+            deliverOrders();
 
             orders.forEach(Order::decreaseDueTime);
 
@@ -188,6 +190,11 @@ public class Model implements IEnvironment {
             logger.debug(sb.toString());
             result += layer.getQueueSize();
         }
+        sb = new StringBuilder("Completed buffer in turn " + turnNo + " [");
+        for (int product : this.finishedProducts) {
+            sb.append(product).append(",");
+        }
+        logger.debug(sb.toString());
         return result;
     }
 
@@ -196,7 +203,7 @@ public class Model implements IEnvironment {
      *
      * @return reward for completed orders
      */
-    private int deliverOrders(final List<Order> orders, final int[] finishedProducts) throws Exception {
+    private int deliverOrders() throws Exception {
         int reward = 0;
         logger.debug("Delivering orders!");
         logger.debug("Orders queue size: " + orders.size());
@@ -205,6 +212,8 @@ public class Model implements IEnvironment {
             sb.append(product).append(",");
         }
         logger.debug("Finished products: [" + sb + "]");
+
+
         for (Iterator<Order> it = orders.iterator(); it.hasNext(); ) {
             Order order = it.next();
             int[] demandedProducts = order.getProductsList();
@@ -252,7 +261,7 @@ public class Model implements IEnvironment {
     private Order generateOrder() {
         Random random = new Random();
         int[] order = new int[Parameters.PRODUCT_TYPES_NO];
-        order[random.nextInt(order.length)] = 1;//random.nextInt(MAX_ORDER_SIZE - MIN_ORDER_SIZE) + MIN_ORDER_SIZE;
+        order[random.nextInt(order.length)] = 1;
 
         int reward = Parameters.REWARD != 0 ? Parameters.REWARD : random.nextInt(MAX_REWARD_VALUE);
         int penalty = Parameters.PENALTY != 0 ? (int) (reward * Parameters.PENALTY) : random.nextInt(reward);

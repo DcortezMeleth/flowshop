@@ -36,6 +36,8 @@ public class Machine extends AbstractAgent {
     /** Type of processed product */
     private int productType = -1;
 
+    private boolean changed = false;
+
     /** Turns left for product to be processed */
     private int turnsLeft = 0;
 
@@ -135,7 +137,7 @@ public class Machine extends AbstractAgent {
     protected void decideOnAction() throws Exception {
         //changing production type while working is forbidden
         if (this.turnsLeft > 0) {
-            logger.debug("Machine " + getId() + " still working!");
+            logger.debug("Machine " + getId() + " still working on " + this.productType + " + !");
             return;
         }
 
@@ -143,13 +145,13 @@ public class Machine extends AbstractAgent {
         Action action = (Action) act();
         int actionToChoose = action.getProductToProcess();
 
-        // zmienilismy typ -> czekamy ture
-        if (actionToChoose != this.productType) {
+        /*if (actionToChoose != this.productType) {
             logger.debug("Machine " + getId() + " changed to " + actionToChoose);
+            this.changed = true;
             this.turnsLeft++;
-        } else {
-            logger.debug("Machine " + getId() + " producing same product.");
-        }
+        } else {*/
+            //logger.debug("Machine " + getId() + " producing same product.");
+        //}
 
         this.productType = actionToChoose;
     }

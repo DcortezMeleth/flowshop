@@ -5,7 +5,7 @@
       "timeTable": {
         "0": 2,
         "1": 3,
-        "2": 5
+        "2": 1
       },
       "classifierName": "QLearning"
     },
@@ -14,7 +14,7 @@
       "timeTable": {
         "0": 2,
         "1": 3,
-        "2": 5
+        "2": 1
       },
       "classifierName": "QLearning"
     }
@@ -25,7 +25,7 @@
       "timeTable": {
         "0": 2,
         "1": 3,
-        "2": 5
+        "2": 1
       },
       "classifierName": "QLearning"
     },
@@ -34,7 +34,7 @@
       "timeTable": {
         "0": 2,
         "1": 3,
-        "2": 5
+        "2": 1
       },
       "classifierName": "QLearning"
     }

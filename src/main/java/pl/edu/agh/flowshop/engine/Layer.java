@@ -64,8 +64,8 @@ public class Layer {
         }
 
         //chance for changing processing product type
+        logger.debug("Layer " + id + " decision time.");
         for (Machine machine : this.machines) {
-            logger.debug("Layer " + id + " decision time.");
             machine.decideOnAction();
         }
 
