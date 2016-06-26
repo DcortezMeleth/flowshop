@@ -36,7 +36,7 @@ public class Machine extends AbstractAgent {
     /** Type of processed product */
     private int productType = -1;
 
-    private boolean changed = false;
+    private boolean processing = false;
 
     /** Turns left for product to be processed */
     private int turnsLeft = 0;
@@ -106,6 +106,7 @@ public class Machine extends AbstractAgent {
             }
             this.productType = -1;
             this.turnsLeft = 1;
+            this.processing = false;
             return -1;
         }
 
@@ -115,12 +116,14 @@ public class Machine extends AbstractAgent {
                 logger.debug("Machine " + getId() + " takes task from queue!");
                 newTasks[this.productType] -= 1;
                 this.turnsLeft = this.timeTable.get(this.productType);
+                this.processing = true;
             }
 
             this.turnsLeft--;
 
             //finished product is moved to finishedProduct field
-            if (this.turnsLeft <= 0) {
+            if (this.turnsLeft <= 0 && this.processing) {
+                this.processing = false;
                 logger.debug("Machine " + getId() + " finishes product " + this.productType);
                 return this.productType;
             }
@@ -136,22 +139,18 @@ public class Machine extends AbstractAgent {
      */
     protected void decideOnAction() throws Exception {
         //changing production type while working is forbidden
-        if (this.turnsLeft > 0) {
+        if (this.turnsLeft > 0 && this.processing) {
             logger.debug("Machine " + getId() + " still working on " + this.productType + " + !");
             return;
         }
 
-
         Action action = (Action) act();
         int actionToChoose = action.getProductToProcess();
 
-        /*if (actionToChoose != this.productType) {
+        if (actionToChoose != this.productType) {
             logger.debug("Machine " + getId() + " changed to " + actionToChoose);
-            this.changed = true;
             this.turnsLeft++;
-        } else {*/
-            //logger.debug("Machine " + getId() + " producing same product.");
-        //}
+        }
 
         this.productType = actionToChoose;
     }

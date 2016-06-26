@@ -131,7 +131,7 @@ public class Model implements IEnvironment {
         int targetLayer = 0;
         for (Layer layer : this.layers) {
             for (Machine machine : layer.getMachines()) {
-                if(machine.getId() == action.getAgentNo()) {
+                if (machine.getId() == action.getAgentNo()) {
                     targetLayer = j;
                 }
                 health[i++] = !machine.isBroken();

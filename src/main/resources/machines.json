@@ -4,17 +4,7 @@
       "id": 1,
       "timeTable": {
         "0": 2,
-        "1": 3,
-        "2": 1
-      },
-      "classifierName": "QLearning"
-    },
-    {
-      "id": 2,
-      "timeTable": {
-        "0": 2,
-        "1": 3,
-        "2": 1
+        "1": 3
       },
       "classifierName": "QLearning"
     }
@@ -24,8 +14,7 @@
       "id": 3,
       "timeTable": {
         "0": 2,
-        "1": 3,
-        "2": 1
+        "1": 3
       },
       "classifierName": "QLearning"
     },
@@ -33,8 +22,7 @@
       "id": 4,
       "timeTable": {
         "0": 2,
-        "1": 3,
-        "2": 1
+        "1": 3
       },
       "classifierName": "QLearning"
     }
