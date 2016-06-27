@@ -28,6 +28,10 @@ public class Model implements IEnvironment {
 
     public static final int DUE_TIME_MIN_VALUE = 8;
 
+    public static final int MAX_ORDER_SIZE = 5;
+
+    public static final int MIN_ORDER_SIZE = 3;
+
     private final static Logger logger = LogManager.getLogger(Model.class);
 
     /** Buffer of finished products waiting for delivery */
@@ -69,7 +73,7 @@ public class Model implements IEnvironment {
                 order = generateOrder();
                 orders.add(order);
                 products = order.getProductsList();
-                newOrderTurn += random.sample();
+                newOrderTurn += random.sample() + 4;
                 logger.debug("Order generated: " + order.toString());
             } else {
                 products = new int[Parameters.PRODUCT_TYPES_NO];
@@ -261,7 +265,7 @@ public class Model implements IEnvironment {
     private Order generateOrder() {
         Random random = new Random();
         int[] order = new int[Parameters.PRODUCT_TYPES_NO];
-        order[random.nextInt(order.length)] = 1;
+        order[random.nextInt(order.length)] = random.nextInt(MAX_ORDER_SIZE - MIN_ORDER_SIZE) + MIN_ORDER_SIZE;
 
         int reward = Parameters.REWARD != 0 ? Parameters.REWARD : random.nextInt(MAX_REWARD_VALUE);
         int penalty = Parameters.PENALTY != 0 ? (int) (reward * Parameters.PENALTY) : random.nextInt(reward);
