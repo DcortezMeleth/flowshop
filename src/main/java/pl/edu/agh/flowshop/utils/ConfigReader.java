@@ -13,6 +13,7 @@ import java.io.Reader;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Class responsible for reading an experiment configuration from file.
@@ -31,9 +32,7 @@ public class ConfigReader {
         List<Layer> layers = new ArrayList<>();
         Model model = new Model(layers);
 
-        for (List<Machine> machines : machinesConf) {
-            layers.add(new Layer(machines));
-        }
+        layers.addAll(machinesConf.stream().map(Layer::new).collect(Collectors.toList()));
 
         for (Layer layer : layers) {
             layer.setModel(model);
@@ -43,9 +42,7 @@ public class ConfigReader {
         Attributes.initAttributes(model);
 
         for (Layer layer: layers) {
-            for(Machine machine : layer.getMachines()) {
-                machine.init(model);
-            }
+            layer.getMachines().forEach(Machine::init);
         }
 
         return model;

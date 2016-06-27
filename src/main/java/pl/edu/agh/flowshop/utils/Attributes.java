@@ -18,6 +18,12 @@ public abstract class Attributes {
     /** Attribute holding health info prefix */
     public static final String HEALTH_PREFIX = "_health_";
 
+    public static final String BAD = "bad";
+
+    public static final String NORMAL = "normal";
+
+    public static final String GOOD = "good";
+
     public static FastVector attributes;
 
     public static int size() {
@@ -53,6 +59,12 @@ public abstract class Attributes {
         result.addElement("1");
         result.addElement("2");
         attr_vec.addElement(new Attribute("result", result));
+
+        FastVector quality = new FastVector(3);
+        quality.addElement(BAD);
+        quality.addElement(NORMAL);
+        quality.addElement(GOOD);
+        attr_vec.addElement(new Attribute("quality", quality));
 
         attributes = attr_vec;
     }

@@ -34,18 +34,6 @@ public abstract class Parameters {
     /** Threshold for decision between good and bad labels */
     public static final int DECISION_THRESHOLD;
 
-    /** Lenght of history entries used for learning */
-    public static final int USED_HISTORY;
-
-    /** Parameter lambda used for Watkins and Peng algorithms */
-    public static final double LAMBDA;
-
-    /** Parameter epsilon used for Watkins and Peng algorithms */
-    public static final double EPSILON;
-
-    /** Parameter gamma used for Watkins and Peng algorithms */
-    public static final double GAMMA;
-
     /** Products unit costs */
     public static final Map<Integer, Integer> COSTS;
 
@@ -73,18 +61,6 @@ public abstract class Parameters {
     /** Threshold for decision between good and bad labels */
     private static final String DECISION_THRESHOLD_KEY = "DECISION_THRESHOLD";
 
-    /** Lenght of history entries used for learning */
-    private static final String USED_HISTORY_KEY = "USED_HISTORY";
-
-    /** Parameter lambda used for Watkins and Peng algorithms */
-    private static final String LAMBDA_KEY = "LAMBDA";
-
-    /** Parameter epsilon used for Watkins and Peng algorithms */
-    private static final String EPSILON_KEY = "EPSILON";
-
-    /** Parameter gamma used for Watkins and Peng algorithms */
-    private static final String GAMMA_KEY = "GAMMA";
-
     /** File with experiment configuration */
     private static final String PROPERTIES_FILE_KEY = "flowshop.properties";
 
@@ -99,13 +75,6 @@ public abstract class Parameters {
         REWARD = Integer.parseInt(configuration.getProperty(REWARD_KEY));
         DECISION_THRESHOLD = Integer.parseInt(configuration.getProperty(DECISION_THRESHOLD_KEY));
         PENALTY = Double.parseDouble(configuration.getProperty(PENALTY_KEY));
-        USED_HISTORY = Integer.parseInt(configuration.getProperty(USED_HISTORY_KEY));
-        LAMBDA = configuration.getProperty(LAMBDA_KEY) != null ?
-                Double.parseDouble(configuration.getProperty(LAMBDA_KEY)) : 0.5;
-        EPSILON = configuration.getProperty(LAMBDA_KEY) != null ?
-                Double.parseDouble(configuration.getProperty(LAMBDA_KEY)) : 0.9;
-        GAMMA = configuration.getProperty(LAMBDA_KEY) != null ?
-                Double.parseDouble(configuration.getProperty(LAMBDA_KEY)) : 0.9;
 
         COSTS = new HashMap<>();
         for (int i = 0; i < PRODUCT_TYPES_NO; i++) {
