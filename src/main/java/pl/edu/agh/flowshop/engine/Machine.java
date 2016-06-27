@@ -145,6 +145,7 @@ public class Machine extends AbstractAgent {
         }
 
         Action action = (Action) act();
+        //int actionToChoose = new Random().nextInt(Parameters.PRODUCT_TYPES_NO);
         int actionToChoose = action.getProductToProcess();
 
         if (actionToChoose != this.productType) {

@@ -69,7 +69,7 @@ public class Model implements IEnvironment {
                 order = generateOrder();
                 orders.add(order);
                 products = order.getProductsList();
-                newOrderTurn += random.sample() + 3;
+                newOrderTurn += random.sample();
                 logger.debug("Order generated: " + order.toString());
             } else {
                 products = new int[Parameters.PRODUCT_TYPES_NO];
