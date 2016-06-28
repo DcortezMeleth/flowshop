@@ -94,7 +94,8 @@ public class Model implements IEnvironment {
 
             orders.forEach(Order::decreaseDueTime);
 
-            queueSizes.add(getQueuesSize(turnNo));
+            queueSizes.add(getTime());
+            //queueSizes.add(getQueuesSize(turnNo));
             logger.debug("Orders size:" + orders.size());
             logger.debug("Finished orders size:" + finishedOrders.size());
         }
@@ -180,6 +181,15 @@ public class Model implements IEnvironment {
 
     public List<Layer> getLayers() {
         return layers;
+    }
+
+    private Double getTime() {
+        Long duration = 0L;
+        for(Layer layer : this.layers) {
+            duration += layer.getDuration();
+        }
+
+        return duration.doubleValue();
     }
 
     /** Return number of all product in all queues */

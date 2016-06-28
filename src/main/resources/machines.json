@@ -17,6 +17,44 @@
         "0": 2
       },
       "classifierName": "Watkins"
+    },
+    {
+      "id": 7,
+      "timeTable": {
+        "1": 3,
+        "2": 5,
+        "0": 2
+      },
+      "classifierName": "Watkins"
+    }
+  ],
+  [
+    {
+      "id": 3,
+      "timeTable": {
+        "1": 3,
+        "2": 5,
+        "0": 2
+      },
+      "classifierName": "Watkins"
+    },
+    {
+      "id": 4,
+      "timeTable": {
+        "1": 3,
+        "2": 5,
+        "0": 2
+      },
+      "classifierName": "Watkins"
+    },
+    {
+      "id": 8,
+      "timeTable": {
+        "1": 3,
+        "2": 5,
+        "0": 2
+      },
+      "classifierName": "Watkins"
     }
   ],
   [
@@ -31,6 +69,15 @@
     },
     {
       "id": 6,
+      "timeTable": {
+        "1": 3,
+        "2": 5,
+        "0": 2
+      },
+      "classifierName": "Watkins"
+    },
+    {
+      "id": 9,
       "timeTable": {
         "1": 3,
         "2": 5,
