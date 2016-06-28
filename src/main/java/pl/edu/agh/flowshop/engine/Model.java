@@ -63,14 +63,17 @@ public class Model {
         for (int turnNo = 0; turnNo < Parameters.TURN_LIMIT; turnNo++) {
             logger.debug("Turn: " + turnNo);
 
+            Long duration = 0L;
             //train on collected data
             if (turnNo % Parameters.LEARNING_TURN == 0) {
                 logger.debug("Learning turn!");
+                long start = System.currentTimeMillis();
                 for (Layer layer : this.layers) {
                     for (Machine machine : layer.getMachines()) {
                         machine.train();
                     }
                 }
+                duration = System.currentTimeMillis() - start;
             }
 
             //generate new order
@@ -104,7 +107,8 @@ public class Model {
 
             orders.forEach(Order::decreaseDueTime);
 
-            queueSizes.add(getQueuesSize(turnNo));
+            queueSizes.add(duration.doubleValue() + getTime());
+            //queueSizes.add(getQueuesSize(turnNo));
             logger.debug("Orders size:" + orders.size());
             logger.debug("Finished orders size:" + finishedOrders.size());
         }
@@ -125,6 +129,15 @@ public class Model {
         Instance instance = new SparseInstance(Attributes.size() - 1);
         setAttributesValues(instance);
         return instance;
+    }
+
+    private Double getTime() {
+        Long duration = 0L;
+        for(Layer layer : this.layers) {
+            duration += layer.getDuration();
+        }
+
+        return duration.doubleValue();
     }
 
     /** Return number of all product in all queues */

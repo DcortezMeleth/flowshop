@@ -31,6 +31,8 @@ public class Layer {
     /** machines list */
     private List<Machine> machines;
 
+    private long duration;
+
     public Layer(final List<Machine> machines) {
         this.buffer = new int[Parameters.PRODUCT_TYPES_NO];
         this.machines = machines;
@@ -76,10 +78,12 @@ public class Layer {
         }
 
         //chance for changing processing product type
+        logger.debug("Layer " + id + " decision time.");
+        long start = System.currentTimeMillis();
         for (Machine machine : this.machines) {
-            logger.debug("Layer " + id + " decision time.");
             machine.decideOnAction(model.prepareInstanceForDecision(), this.buffer);
         }
+        this.duration = System.currentTimeMillis() - start;
 
         //tick for machines
         int[] finishedProducts = new int[Parameters.PRODUCT_TYPES_NO];
@@ -97,6 +101,10 @@ public class Layer {
         }
         logger.debug("Finished products for layer " + id + ": [" + sb + "]");
         return finishedProducts;
+    }
+
+    public long getDuration() {
+        return duration;
     }
 
 }

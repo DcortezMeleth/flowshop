@@ -19,6 +19,11 @@ public class Experiment {
             Model model = ConfigReader.createModel();
             List<Double> results = model.run();
             GraphPanel graph;
+
+            for(Double result : results) {
+                System.out.println(result + ";");
+            }
+
             graph = createAndShowGui();
             graph.setScores(results);
         } catch (Exception e) {
